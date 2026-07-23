@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f4ed">
+  <title>Kotoba Quest — Japanese Verb Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="forms.css">
+  <link rel="stylesheet" href="controls.css">
+  <link rel="stylesheet" href="guide.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="Kotoba Quest home">
+        <span class="brand-mark" aria-hidden="true">こ</span>
+        <span>Kotoba Quest</span>
+      </a>
+      <div class="header-actions">
+        <button class="icon-button" id="sound-toggle" aria-label="Turn sound off" aria-pressed="true"><span aria-hidden="true">♪</span></button>
+        <button class="streak-chip" id="history-button" aria-label="Show practice history"><span aria-hidden="true">✦</span> <strong id="streak-count">0</strong> day streak</button>
+      </div>
+    </header>
+
+    <main id="app" tabindex="-1">
+      <section class="screen welcome-screen" id="welcome-screen" aria-labelledby="welcome-title">
+        <div class="hero-copy">
+          <div class="eyebrow"><span></span> YOUR DAILY JAPANESE WORKOUT</div>
+          <h1 id="welcome-title">Turn verbs into<br><em>victories.</em></h1>
+          <p>Master Japanese conjugations one verb at a time—with a clever little companion by your side.</p>
+        </div>
+
+        <div class="welcome-grid">
+          <form class="setup-card" id="setup-form">
+            <div class="step-label">01 <span>CHOOSE YOUR LEVEL</span></div>
+            <div class="segmented large" role="radiogroup" aria-label="Difficulty level">
+              <label><input type="radio" name="difficulty" value="beginner" checked><span><b>Beginner</b><small>Core verbs</small></span></label>
+              <label><input type="radio" name="difficulty" value="intermediate"><span><b>Intermediate</b><small>More endings</small></span></label>
+              <label><input type="radio" name="difficulty" value="mixed"><span><b>Mixed</b><small>Surprise me</small></span></label>
+            </div>
+
+            <div class="step-label">02 <span>READING STYLE</span></div>
+            <div class="reading-options" role="radiogroup" aria-label="Japanese reading mode">
+              <label>
+                <input type="radio" name="reading" value="kanji" checked>
+                <span class="reading-card"><b><ruby>食<rt>た</rt>べる</ruby></b><small>Kanji + furigana</small><i aria-hidden="true">✓</i></span>
+              </label>
+              <label>
+                <input type="radio" name="reading" value="hiragana">
+                <span class="reading-card"><b>食べる</b><small>Kanji only</small><i aria-hidden="true">✓</i></span>
+              </label>
+            </div>
+
+            <div class="step-label">03 <span>CHOOSE VERBS</span></div>
+            <div class="verb-source-options">
+              <label for="verb-source">Practice from</label>
+              <select id="verb-source" name="verbSource">
+                <option value="difficulty">Selected difficulty</option>
+                <optgroup label="JLPT level (study estimate)">
+                  <option value="N5">JLPT N5</option>
+                  <option value="N4">JLPT N4</option>
+                  <option value="N3">JLPT N3</option>
+                  <option value="N2">JLPT N2</option>
+                  <option value="N1">JLPT N1</option>
+                </optgroup>
+                <optgroup label="Verb group">
+                <option value="Ichidan">Ichidan verbs</option>
+                <option value="Godan">Godan verbs</option>
+                <option value="Irregular">Irregular verbs</option>
+                </optgroup>
+                <option value="custom">My custom group</option>
+              </select>
+              <small class="jlpt-note">1,200+ dictionary verbs. JLPT levels are practical study estimates; the JLPT does not publish official vocabulary lists. Dictionary entries derived from EDRDG EDICT2.</small>
+              <fieldset class="custom-verbs hidden" id="custom-verbs">
+                <legend>Select individual verbs</legend>
+                <input class="verb-search" id="verb-search" type="search" placeholder="Search Japanese, reading, or meaning…">
+                <div class="catalog-filters" aria-label="Filter custom verbs">
+                  <fieldset><legend>JLPT levels</legend><div class="filter-checks">
+                    <label><input type="checkbox" name="filterJlpt" value="N5"> N5</label><label><input type="checkbox" name="filterJlpt" value="N4"> N4</label><label><input type="checkbox" name="filterJlpt" value="N3"> N3</label><label><input type="checkbox" name="filterJlpt" value="N2"> N2</label><label><input type="checkbox" name="filterJlpt" value="N1"> N1</label>
+                  </div></fieldset>
+                  <fieldset><legend>Verb groups</legend><div class="filter-checks">
+                    <label><input type="checkbox" name="filterGroup" value="Godan"> Godan</label><label><input type="checkbox" name="filterGroup" value="Ichidan"> Ichidan</label><label><input type="checkbox" name="filterGroup" value="Irregular"> Irregular</label>
+                  </div></fieldset>
+                  <fieldset><legend>Verb type</legend><div class="filter-checks">
+                    <label><input type="checkbox" name="filterType" value="action"> Action</label><label><input type="checkbox" name="filterType" value="state"> State</label>
+                  </div></fieldset>
+                </div>
+                <div class="catalog-tools"><button type="button" id="select-visible">Select visible</button><button type="button" id="clear-custom">Clear selection</button></div>
+                <p class="verb-count" id="verb-count"></p>
+                <div id="custom-verb-list"></div>
+                <p id="custom-verb-error" class="selection-error" role="alert"></p>
+              </fieldset>
+            </div>
+
+            <button class="primary-button" type="submit">Start today’s quest <span aria-hidden="true">→</span></button>
+            <p class="setup-note">1 verb · 19 core conjugations</p>
+          </form>
+
+          <aside class="companion-intro" aria-label="Meet your companion">
+            <div class="speech-bubble">Ready when you are!<br><strong>いっしょにがんばろう。</strong></div>
+            <div class="mori large-mori" aria-hidden="true"><span class="ear left"></span><span class="ear right"></span><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="mouth"></i></span><span class="tail"></span></div>
+            <div class="meet-label">MEET MORI <span>Your study sidekick</span></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="screen game-screen hidden" id="game-screen" aria-labelledby="challenge-title">
+        <div class="game-topbar">
+          <button class="text-button" id="quit-button">← Leave quest</button>
+          <div class="progress-copy"><strong id="progress-text">0 of 19</strong><span>forms completed</span></div>
+          <button class="text-button" id="reading-toggle">漢 Kanji only</button>
+        </div>
+        <div class="progress-track" aria-hidden="true"><span id="progress-bar"></span></div>
+
+        <div class="game-layout">
+          <div class="challenge-column">
+            <article class="verb-card">
+              <span class="verb-label">TODAY’S VERB</span>
+              <div class="verb-main">
+                <div><h2 id="verb-display">食べる</h2><p id="verb-reading">たべる</p><p id="verb-romaji">taberu</p></div>
+                <div class="verb-meta"><strong id="verb-meaning">to eat</strong><span id="verb-group">Ichidan verb</span></div>
+              </div>
+            </article>
+
+            <article class="challenge-card" id="challenge-card">
+              <span class="form-kicker">ONE VERB · COMPLETE CORE SET</span>
+              <h1 id="challenge-title">Complete the conjugation</h1>
+              <p id="form-description">Answer each form in order.</p>
+              <div id="forms-grid" class="forms-grid"></div>
+              <section class="conjugation-guide" id="conjugation-guide" aria-label="Verb conjugation reference">
+                <div class="guide-head"><div><span>CONJUGATION REFERENCE</span><strong id="guide-current-group">Godan pattern</strong></div><button type="button" id="guide-toggle" aria-expanded="true">Hide</button></div>
+                <div class="guide-content" id="guide-content">
+                  <details class="group-guide" data-guide-group="Godan" open>
+                    <summary>Godan sound changes</summary>
+                    <div class="table-scroll"><table class="sound-table">
+                      <thead><tr><th>Ending</th><th>あ row<br><small>ない・受身</small></th><th>い row<br><small>ます・たい</small></th><th>え row<br><small>可能・ば</small></th><th>お row<br><small>意向</small></th><th>て form</th><th>た form</th></tr></thead>
+                      <tbody>
+                        <tr><th>う</th><td>わ</td><td>い</td><td>え</td><td>お</td><td>って</td><td>った</td></tr>
+                        <tr><th>く</th><td>か</td><td>き</td><td>け</td><td>こ</td><td>いて</td><td>いた</td></tr>
+                        <tr><th>ぐ</th><td>が</td><td>ぎ</td><td>げ</td><td>ご</td><td>いで</td><td>いだ</td></tr>
+                        <tr><th>す</th><td>さ</td><td>し</td><td>せ</td><td>そ</td><td>して</td><td>した</td></tr>
+                        <tr><th>つ</th><td>た</td><td>ち</td><td>て</td><td>と</td><td>って</td><td>った</td></tr>
+                        <tr><th>ぬ</th><td>な</td><td>に</td><td>ね</td><td>の</td><td>んで</td><td>んだ</td></tr>
+                        <tr><th>ぶ</th><td>ば</td><td>び</td><td>べ</td><td>ぼ</td><td>んで</td><td>んだ</td></tr>
+                        <tr><th>む</th><td>ま</td><td>み</td><td>め</td><td>も</td><td>んで</td><td>んだ</td></tr>
+                        <tr><th>る</th><td>ら</td><td>り</td><td>れ</td><td>ろ</td><td>って</td><td>った</td></tr>
+                      </tbody>
+                    </table></div>
+                    <p class="guide-note"><strong>Exception:</strong> 行く → 行って / 行った</p>
+                  </details>
+                  <details class="group-guide" data-guide-group="Ichidan">
+                    <summary>Ichidan pattern</summary>
+                    <div class="pattern-grid"><span>Remove <b>る</b></span><span>ます<br><b>食べます</b></span><span>ない<br><b>食べない</b></span><span>て / た<br><b>食べて / 食べた</b></span><span>られる<br><b>食べられる</b></span><span>させる<br><b>食べさせる</b></span></div>
+                  </details>
+                  <details class="group-guide" data-guide-group="Irregular">
+                    <summary>Irregular patterns</summary>
+                    <div class="table-scroll"><table class="sound-table"><thead><tr><th>Verb</th><th>ます</th><th>ない</th><th>て</th><th>た</th><th>Potential</th></tr></thead><tbody><tr><th>する</th><td>します</td><td>しない</td><td>して</td><td>した</td><td>できる</td></tr><tr><th>来る</th><td>来ます</td><td>来ない</td><td>来て</td><td>来た</td><td>来られる</td></tr></tbody></table></div>
+                  </details>
+                </div>
+              </section>
+              <button class="primary-button next-button hidden" id="finish-button">Next form <span>→</span></button>
+            </article>
+          </div>
+
+          <aside class="side-column">
+            <div class="mori-panel">
+              <div class="mori" aria-hidden="true"><span class="ear left"></span><span class="ear right"></span><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="mouth"></i></span><span class="tail"></span></div>
+              <div class="mori-chat"><span>MORI SAYS</span><p id="companion-message" aria-live="polite">Let’s warm up with a polite form. You’ve got this!</p></div>
+            </div>
+            <div class="form-map" aria-label="Conjugation progress">
+              <div class="form-map-title"><span>FORM CHECKLIST</span><strong id="map-count">0 / 19</strong></div>
+              <ol id="form-map-list"></ol>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="screen results-screen hidden" id="results-screen" aria-labelledby="results-title">
+        <div class="results-hero">
+          <div class="confetti" aria-hidden="true">✦　·　✧　·　✦</div>
+          <span class="eyebrow centered">QUEST COMPLETE</span>
+          <h1 id="results-title">Nicely done!</h1>
+          <p id="results-subtitle">You completed the full core set.</p>
+        </div>
+        <div class="results-grid">
+          <div class="score-card"><span>FIRST-TRY SCORE</span><strong id="accuracy-score">19/19</strong><small>completed</small></div>
+          <div class="score-card"><span>TOTAL ATTEMPTS</span><strong id="attempt-score">8</strong><small>keep refining</small></div>
+          <div class="score-card"><span>TOUGHEST FORM</span><strong class="small-score" id="toughest-score">—</strong><small id="toughest-note">Smooth round</small></div>
+        </div>
+        <div class="summary-layout">
+          <div class="summary-card">
+            <div class="summary-heading"><div><span>FULL CONJUGATION TABLE</span><h2 id="summary-verb">食べる · to eat</h2></div><button class="text-button" id="expand-all">Expand all</button></div>
+            <div id="summary-list"></div>
+          </div>
+          <aside>
+            <div class="mori-panel results-mori"><div class="mori" aria-hidden="true"><span class="ear left"></span><span class="ear right"></span><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="mouth"></i></span><span class="tail"></span></div><div class="mori-chat"><span>MORI’S NOTE</span><p id="results-message"></p></div></div>
+            <div class="weak-card"><span>PRACTICE FOCUS</span><h3 id="weak-title">Keep building momentum</h3><p id="weak-description">Every round strengthens your recall.</p></div>
+          </aside>
+        </div>
+        <div class="results-actions"><button class="secondary-button" id="retry-button">Practise this verb again</button><button class="primary-button" id="new-verb-button">Continue to a new verb <span>→</span></button></div>
+      </section>
+    </main>
+
+    <dialog id="history-dialog"><button class="dialog-close" aria-label="Close practice history">×</button><span class="eyebrow">YOUR PROGRESS</span><h2>Practice history</h2><div id="history-content"></div></dialog>
+  </div>
+  <script src="verb-catalog.js"></script>
+  <script src="verbs.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
