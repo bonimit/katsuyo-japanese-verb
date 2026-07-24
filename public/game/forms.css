@@ -6,6 +6,8 @@
 .form-question-head span{font-family:"Noto Sans JP";font-size:12px;color:var(--muted)}
 .form-question .answer-row input{font-size:17px;padding:11px 13px}
 .form-question .submit-answer{padding:0 18px}
+.form-question .answer-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto}
+.form-question .next-button{width:auto;min-height:48px;margin-top:0;padding:0 18px;white-space:nowrap}
 .form-question-feedback{font-size:12px;color:var(--muted);margin:9px 2px 0;line-height:1.45}
 .form-question-feedback.error{color:#a94f3c}
 .form-question details{margin-top:10px;border-top:1px solid var(--line)}
@@ -17,3 +19,4 @@
 .example-sentence p{font-family:"Noto Sans JP";font-size:16px;margin:5px 0 0;line-height:1.55}
 .example-sentence dl{margin:10px 0 0;border-top:1px solid rgba(138,107,24,.2);padding-top:7px}.example-sentence dl>div{display:grid;grid-template-columns:70px 1fr;gap:8px;padding:4px 0}.example-sentence dt{font-size:10px;font-weight:700;color:#8a6b18}.example-sentence dd{margin:0;font-size:12px;line-height:1.45}.example-sentence dd[lang="ja"]{font-family:"Noto Sans JP"}
 .summary-example{font-family:"Noto Sans JP";font-size:15px;color:var(--ink);background:#fff8df;border-radius:9px;padding:9px 11px;margin-bottom:10px}
+@media(max-width:560px){.form-question .answer-row{grid-template-columns:1fr 1fr}.form-question .answer-row input{grid-column:1/-1}.form-question .submit-answer,.form-question .next-button{width:100%}}

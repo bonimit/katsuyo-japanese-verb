@@ -57,7 +57,7 @@
     $('#form-description').textContent=f.prompt;
     $('#forms-grid').innerHTML=`<form class="form-question" data-index="${i}" autocomplete="off">
       <div class="form-question-head"><label for="answer-${i}">Form ${i+1} of ${FORM_COUNT}</label><span>${f.short}</span></div>
-      <div class="answer-row"><input id="answer-${i}" lang="ja" placeholder="Type in Japanese…" required autofocus><button class="submit-answer" type="submit">Check</button></div>
+      <div class="answer-row"><input id="answer-${i}" lang="ja" placeholder="Type in Japanese…" required autofocus><button class="submit-answer" type="submit">Check</button><button class="primary-button next-button hidden" id="finish-button" type="button">Next form <span>→</span></button></div>
       <p class="form-question-feedback" aria-live="polite">Japanese keyboard recommended</p>
     </form>`;
     $('#forms-grid form').addEventListener('submit',checkForm);
@@ -213,7 +213,7 @@
     }
     $('#custom-verb-error').textContent='';state.difficulty=d.get('difficulty');state.verbSource=source;saved.reading=d.get('reading');persist();startRound(choose(state.difficulty,null,source));
   });
-  $('#finish-button').addEventListener('click',nextForm);$('#quit-button').addEventListener('click',()=>show('welcome'));
+  $('#forms-grid').addEventListener('click',e=>{if(e.target.closest('#finish-button'))nextForm();});$('#quit-button').addEventListener('click',()=>show('welcome'));
   $('#reading-toggle').addEventListener('click',()=>{saved.reading=saved.reading==='kanji'?'hiragana':'kanji';persist();$('#verb-display').innerHTML=displayVerb();$('#reading-toggle').textContent=saved.reading==='kanji'?'漢 Kanji only':'ふ Furigana';});
   $('#retry-button').addEventListener('click',()=>startRound(state.verb));$('#new-verb-button').addEventListener('click',()=>startRound(choose(state.difficulty,state.verb.id,state.verbSource)));
   $('#expand-all').addEventListener('click',e=>{const rows=[...document.querySelectorAll('.summary-row')],open=rows.some(r=>!r.open);rows.forEach(r=>r.open=open);e.currentTarget.textContent=open?'Collapse all':'Expand all';});
