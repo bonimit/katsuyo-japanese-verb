@@ -1,4 +1,5 @@
 .verb-source-options>label{display:block;font-size:12px;font-weight:700;margin-bottom:8px}
+.segmented{grid-template-columns:repeat(4,1fr)}
 .verb-source-options select{width:100%;min-height:48px;border:1px solid var(--line);border-radius:12px;background:white;padding:0 14px;color:var(--ink)}
 .jlpt-note{display:block;color:var(--muted);font-size:10px;line-height:1.4;margin-top:7px}
 .custom-verbs{border:1px solid var(--line);border-radius:14px;margin:12px 0 0;padding:14px}
@@ -26,4 +27,4 @@
 .kana-keys button{min-width:0;min-height:38px;border:1px solid var(--line);border-radius:8px;background:white;font-family:"Noto Sans JP";font-size:16px;cursor:pointer}
 .kana-keys button:hover,.kana-keys button:focus-visible{background:var(--mint);outline:2px solid var(--mint-dark)}
 .kana-keys .key-wide{grid-column:span 2;font-family:"DM Sans";font-size:11px}
-@media(max-width:560px){#custom-verb-list{grid-template-columns:1fr}.catalog-filters{grid-template-columns:1fr}.kana-keys{grid-template-columns:repeat(5,1fr)}.kana-keys button{min-height:42px}}
+@media(max-width:560px){.segmented{grid-template-columns:1fr}#custom-verb-list{grid-template-columns:1fr}.catalog-filters{grid-template-columns:1fr}.kana-keys{grid-template-columns:repeat(5,1fr)}.kana-keys button{min-height:42px}}

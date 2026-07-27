@@ -11,13 +11,35 @@
   const persist = () => localStorage.setItem(key, JSON.stringify(saved));
   const normalize = v => v.trim().replace(/[\s　・,.。!！?？]/g,'').normalize('NFKC');
   const screens = {welcome:$('#welcome-screen'),game:$('#game-screen'),results:$('#results-screen')};
+  const JLPT_LEVELS=['N5','N4','N3','N2','N1'];
 
   function show(name){Object.entries(screens).forEach(([k,e])=>e.classList.toggle('hidden',k!==name));window.scrollTo({top:0,behavior:'smooth'});}
+  function chooseAdaptive(avoid){
+    const recent=saved.history.filter(h=>h.jlpt&&h.formCount).slice(0,6);
+    let targetIndex;
+    if(!recent.length){
+      targetIndex=Math.floor(Math.random()*JLPT_LEVELS.length);
+      state.adaptiveReason=`First adaptive round: trying ${JLPT_LEVELS[targetIndex]} to estimate your level.`;
+    }else{
+      const correct=recent.reduce((sum,h)=>sum+h.firstTry,0),forms=recent.reduce((sum,h)=>sum+h.formCount,0),attempts=recent.reduce((sum,h)=>sum+h.attempts,0);
+      const accuracy=correct/forms,effort=attempts/forms,lastIndex=JLPT_LEVELS.indexOf(recent[0].jlpt);
+      targetIndex=Math.max(0,lastIndex);
+      if(accuracy>=.82&&effort<=1.45)targetIndex++;
+      else if(accuracy<.58||effort>2.1)targetIndex--;
+      targetIndex=Math.max(0,Math.min(JLPT_LEVELS.length-1,targetIndex));
+      const explore=Math.random()<.25?(Math.random()<.5?-1:1):0;
+      targetIndex=Math.max(0,Math.min(JLPT_LEVELS.length-1,targetIndex+explore));
+      state.adaptiveReason=`AI selected ${JLPT_LEVELS[targetIndex]} from your recent ${Math.round(accuracy*100)}% first-try accuracy.`;
+    }
+    const pool=VERBS.filter(v=>v.jlpt===JLPT_LEVELS[targetIndex]&&v.id!==avoid);
+    return pool[Math.floor(Math.random()*pool.length)]||VERBS[Math.floor(Math.random()*VERBS.length)];
+  }
   function choose(level,avoid,source='difficulty'){
     let p;
     if(source==='custom') p=VERBS.filter(v=>saved.customVerbIds.includes(v.id));
     else if(/^N[1-5]$/.test(source)) p=VERBS.filter(v=>v.jlpt===source);
     else if(source!=='difficulty') p=VERBS.filter(v=>v.group.startsWith(source));
+    else if(level==='adaptive')return chooseAdaptive(avoid);
     else p=level==='mixed'?VERBS:VERBS.filter(v=>v.difficulty===level);
     if(!p.length)p=VERBS;
     const d=p.filter(v=>v.id!==avoid);
@@ -43,11 +65,11 @@
   }
 
   function startRound(verb){
-    state={verb,difficulty:state.difficulty||'beginner',verbSource:state.verbSource||'difficulty',current:0,attempts:Array(FORM_COUNT).fill(0),solved:Array(FORM_COUNT).fill(false),firstTry:Array(FORM_COUNT).fill(false)};
+    state={verb,difficulty:state.difficulty||'beginner',verbSource:state.verbSource||'difficulty',adaptiveReason:state.adaptiveReason||'',current:0,attempts:Array(FORM_COUNT).fill(0),solved:Array(FORM_COUNT).fill(false),firstTry:Array(FORM_COUNT).fill(false)};
     $('#verb-display').innerHTML=displayVerb(); $('#verb-reading').textContent=verb.reading;
     $('#verb-romaji').textContent=verb.romaji;
-    $('#verb-meaning').textContent=verb.meaning; $('#verb-group').textContent=`${verb.group} verb`;
-    $('#companion-message').textContent=`One verb, ${FORM_COUNT} core forms. We’ll work through them in order.`;
+    $('#verb-meaning').textContent=verb.meaning; $('#verb-group').textContent=`${verb.jlpt} · ${verb.group} verb`;
+    $('#companion-message').textContent=state.difficulty==='adaptive'&&state.verbSource==='difficulty'?state.adaptiveReason:`One verb, ${FORM_COUNT} core forms. We’ll work through them in order.`;
     renderMap(); renderCurrentForm(); updateProgress(); updateConjugationGuide(); show('game');
   }
 
@@ -165,7 +187,7 @@
   function finish(){
     const today=new Date().toISOString().slice(0,10), total=state.attempts.reduce((a,b)=>a+b,0), score=state.firstTry.filter(Boolean).length;
     if(saved.lastPlayed!==today){const y=new Date(Date.now()-86400000).toISOString().slice(0,10);saved.streak=saved.lastPlayed===y?saved.streak+1:1;saved.lastPlayed=today;}
-    saved.history.unshift({date:today,verb:state.verb.kanji,attempts:total,firstTry:score,formCount:FORM_COUNT});saved.history=saved.history.slice(0,20);persist();
+    saved.history.unshift({date:today,verb:state.verb.kanji,jlpt:state.verb.jlpt,attempts:total,firstTry:score,formCount:FORM_COUNT});saved.history=saved.history.slice(0,20);persist();
     const max=Math.max(...state.attempts), tough=max>1?ACTIVE_FORMS[state.attempts.indexOf(max)]:null;
     $('#accuracy-score').textContent=`${score}/${FORM_COUNT}`;$('#attempt-score').textContent=total;$('#toughest-score').textContent=tough?tough.name:'None';$('#toughest-note').textContent=tough?`${max} attempts`:'Smooth round';
     $('#summary-verb').textContent=`${state.verb.kanji} · ${state.verb.meaning}`;$('#results-subtitle').textContent=`You completed all ${FORM_COUNT} forms of ${state.verb.kanji}.`;
@@ -218,7 +240,7 @@
   $('#retry-button').addEventListener('click',()=>startRound(state.verb));$('#new-verb-button').addEventListener('click',()=>startRound(choose(state.difficulty,state.verb.id,state.verbSource)));
   $('#expand-all').addEventListener('click',e=>{const rows=[...document.querySelectorAll('.summary-row')],open=rows.some(r=>!r.open);rows.forEach(r=>r.open=open);e.currentTarget.textContent=open?'Collapse all':'Expand all';});
   $('#sound-toggle').addEventListener('click',()=>{saved.sound=!saved.sound;persist();updateHeader();});
-  $('#history-button').addEventListener('click',()=>{$('#history-content').innerHTML=saved.history.length?saved.history.map(x=>`<div class="history-item"><span><strong>${x.verb}</strong><br>${x.date}</span><span>${x.firstTry}/${x.formCount||7} first try<br>${x.attempts} attempts</span></div>`).join(''):'<p class="history-empty">Complete your first quest to start a practice history.</p>';$('#history-dialog').showModal();});
+  $('#history-button').addEventListener('click',()=>{$('#history-content').innerHTML=saved.history.length?saved.history.map(x=>`<div class="history-item"><span><strong>${x.verb}</strong> ${x.jlpt?`<small>${x.jlpt}</small>`:''}<br>${x.date}</span><span>${x.firstTry}/${x.formCount||7} first try<br>${x.attempts} attempts</span></div>`).join(''):'<p class="history-empty">Complete your first quest to start a practice history.</p>';$('#history-dialog').showModal();});
   $('.dialog-close').addEventListener('click',()=>$('#history-dialog').close());
   $('#verb-source').addEventListener('change',e=>$('#custom-verbs').classList.toggle('hidden',e.target.value!=='custom'));
   $('#verb-search').addEventListener('input',filterCustomVerbs);
