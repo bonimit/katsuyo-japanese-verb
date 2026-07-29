@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Kotoba Quest — Japanese Verb Practice",
+  title: "Katsuyō — Japanese Verb Practice",
   description:
     "Master Japanese verb conjugations with adaptive clues, real-life examples, translations, and group reference tables.",
 };
