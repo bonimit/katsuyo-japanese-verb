@@ -171,6 +171,16 @@
     return examples[formId]||`今日は${answer}。`;
   }
   function exampleDetails(formId,answer,verb){
+    const nativeExampleOverrides={
+      'つむ:mashita':{
+        japanese:'財布を家に忘れて、完全に詰みました。',
+        hiragana:'さいふをいえにわすれて、かんぜんにつみました。',
+        english:"I left my wallet at home, so I’m completely stuck.",
+        thai:'ลืมกระเป๋าสตางค์ไว้ที่บ้าน เลยไปต่อไม่ได้เลย'
+      }
+    };
+    const nativeExample=nativeExampleOverrides[`${verb.reading}:${formId}`];
+    if(nativeExample)return nativeExample;
     const kanaAnswer=verb.forms[formId].alternatives.find(x=>/^[ぁ-ゖー]+$/.test(x))||answer;
     const gloss=verb.meaning.replace(/^to\s+/i,'');
     const thaiMap={たべる:'กิน',よむ:'อ่าน',かく:'เขียน',いく:'ไป',する:'ทำ',くる:'มา',みる:'ดู',おきる:'ตื่น',かう:'ซื้อ',はなす:'พูด',あける:'เปิด',しめる:'ปิด',およぐ:'ว่ายน้ำ',まつ:'รอ',つづける:'ทำต่อ',きめる:'ตัดสินใจ',えらぶ:'เลือก',もどる:'กลับ',みとめる:'ยอมรับ',くわえる:'เพิ่ม',おこなう:'ดำเนินการ',うしなう:'สูญเสีย'};
