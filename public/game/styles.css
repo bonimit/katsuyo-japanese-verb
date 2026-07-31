@@ -46,3 +46,14 @@ dialog{background:#f7f7ff}.text-button{color:#59628a}.button-ripple{background:r
 @media(max-width:850px){.app-shell::after{display:none}.side-column .mori-panel{display:flex}.companion-intro{display:flex;max-width:370px;margin:28px auto 0}.welcome-grid{grid-template-columns:1fr}.large-mascot{width:220px}.speech-bubble{align-self:center}.setup-card{order:2}}
 @media(max-width:560px){.companion-intro{display:none}.setup-card::before{right:14px}.app-shell{background:radial-gradient(circle at 50% 0,rgba(255,76,181,.42),transparent 28%),linear-gradient(160deg,#2d1372,#0b123d 60%,#080d2f)}}
 @media(prefers-reduced-motion:reduce){.app-shell::before,.app-shell::after,.mascot,.mori-panel::after{animation:none!important}}
+
+/* WCAG AA contrast and keyboard clarity */
+.setup-card,.verb-card,.challenge-card,.summary-card,.score-card{color:#12173f}
+.verb-main h2,.verb-meta strong,.form-question-head label,.guide-head strong{color:#12173f}
+.form-question-feedback{color:#4d567b}
+.guide-head span{color:#8d164f}
+.guide-head button{color:#30385f;text-decoration:underline;text-underline-offset:3px}
+.form-map-title button{color:#b7ff85;text-decoration:underline;text-underline-offset:3px}
+.answer-row input::placeholder,.verb-search::placeholder{color:#636b80;opacity:1}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #ffe94f!important;outline-offset:3px}
+.setup-card button:focus-visible,.setup-card input:focus-visible,.setup-card select:focus-visible,.challenge-card button:focus-visible,.challenge-card input:focus-visible,.challenge-card summary:focus-visible,.summary-card button:focus-visible,.summary-card summary:focus-visible{outline-color:#2463eb!important}
