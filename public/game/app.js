@@ -4,9 +4,12 @@
   const ACTIVE_FORMS = FORMS;
   const FORM_COUNT = ACTIVE_FORMS.length;
   const key = 'kotobaQuest.v2';
-  const defaults = { reading:'kanji', sound:true, streak:0, lastPlayed:null, history:[], misses:{}, customVerbIds:[] };
+  const defaults = { reading:'kanji', sound:true, theme:null, streak:0, lastPlayed:null, history:[], misses:{}, customVerbIds:[] };
   let saved;
   try { saved = { ...defaults, ...JSON.parse(localStorage.getItem(key) || '{}') }; } catch { saved = {...defaults}; }
+  const systemTheme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  const applyTheme=theme=>{document.documentElement.dataset.theme=theme;const toggle=$('#theme-toggle');if(toggle){const light=theme==='light';toggle.setAttribute('aria-label',light?'Switch to dark mode':'Switch to light mode');toggle.setAttribute('aria-pressed',String(light));toggle.querySelector('span').textContent=light?'☾':'☀';}};
+  applyTheme(saved.theme||systemTheme);
   let state = {};
   const persist = () => localStorage.setItem(key, JSON.stringify(saved));
   const normalize = v => v.trim().replace(/[\s　・,.。!！?？]/g,'').normalize('NFKC');
@@ -247,7 +250,7 @@
     updateHeader();show('results');animateMascot('cheering');
   }
 
-  function updateHeader(){$('#streak-count').textContent=saved.streak;$('#sound-toggle').setAttribute('aria-pressed',String(saved.sound));$('#sound-toggle span').textContent=saved.sound?'♪':'×';}
+  function updateHeader(){$('#streak-count').textContent=saved.streak;$('#sound-toggle').setAttribute('aria-pressed',String(saved.sound));$('#sound-toggle span').textContent=saved.sound?'♪':'×';applyTheme(saved.theme||systemTheme);}
   function buildVerbSelector(){
     $('#custom-verb-list').innerHTML=VERBS.map(v=>{const type=verbType(v);return `<label data-jlpt="${v.jlpt}" data-group="${v.group.split(' ')[0]}" data-type="${type}" data-search="${`${v.kanji} ${v.reading} ${v.romaji} ${v.meaning}`.toLowerCase()}"><input type="checkbox" name="customVerb" value="${v.id}" ${saved.customVerbIds.includes(v.id)?'checked':''}><span><strong>${v.kanji}</strong> <span class="verb-kana">${v.reading}</span><br><span class="verb-romaji">${v.romaji}</span> · ${v.meaning}<br><small>${v.jlpt} · ${v.group} · ${type}</small></span></label>`}).join('');
     $('#verb-count').textContent=`${VERBS.length.toLocaleString()} verbs available`;
@@ -290,6 +293,7 @@
   $('#retry-button').addEventListener('click',()=>startRound(state.verb));$('#new-verb-button').addEventListener('click',()=>startRound(choose(state.difficulty,state.verb.id,state.verbSource)));
   $('#expand-all').addEventListener('click',e=>{const rows=[...document.querySelectorAll('.summary-row')],open=rows.some(r=>!r.open);rows.forEach(r=>r.open=open);e.currentTarget.textContent=open?'Collapse all':'Expand all';});
   $('#sound-toggle').addEventListener('click',()=>{saved.sound=!saved.sound;persist();updateHeader();});
+  $('#theme-toggle').addEventListener('click',()=>{saved.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';persist();applyTheme(saved.theme);});
   $('#history-button').addEventListener('click',()=>{$('#history-content').innerHTML=saved.history.length?saved.history.map(x=>`<div class="history-item"><span><strong>${x.verb}</strong> ${x.jlpt?`<small>${x.jlpt}</small>`:''}<br>${x.date}</span><span>${x.firstTry}/${x.formCount||7} first try<br>${x.attempts} attempts</span></div>`).join(''):'<p class="history-empty">Complete your first quest to start a practice history.</p>';$('#history-dialog').showModal();});
   $('.dialog-close').addEventListener('click',()=>$('#history-dialog').close());
   $('#verb-source').addEventListener('change',e=>$('#custom-verbs').classList.toggle('hidden',e.target.value!=='custom'));

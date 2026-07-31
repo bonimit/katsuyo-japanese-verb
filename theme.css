@@ -1,0 +1,51 @@
+html{color-scheme:dark}
+:root{--ink:#111849;--muted:#56618a;--paper:#08104b;--card:#fbfbff;--mint:#b7f34a;--mint-dark:#087f88;--coral:#ff168f;--pink:#ff63bb;--plum:#7024b7;--gold:#ffd83d;--line:#dce2ff}
+.app-shell{background:
+radial-gradient(circle at 12% 8%,rgba(255,22,143,.72) 0 8%,transparent 25%),
+radial-gradient(circle at 86% 18%,rgba(37,54,202,.76) 0 10%,transparent 31%),
+radial-gradient(circle at 70% 78%,rgba(9,214,208,.24),transparent 30%),
+linear-gradient(145deg,#ff168f 0 11%,#8a1cb1 29%,#2529ad 49%,#101a6e 70%,#08104b 100%)}
+.progress-track span{background:linear-gradient(90deg,#ff168f,#7623c5,#174bd3,#09d6d0,#b7f34a)}
+.mori-panel{background:linear-gradient(135deg,#1726a7,#6f1db4 52%,#ff168f)}
+.mori-chat>span{color:#c6ff57}
+.brand-mark{background:linear-gradient(135deg,#ff168f,#2028b8);box-shadow:3px 3px 0 #09d6d0}
+.theme-toggle span{display:block;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.theme-toggle:hover span{transform:rotate(22deg) scale(1.12)}
+
+html[data-theme="light"]{color-scheme:light}
+html[data-theme="light"] body{background:#f8f6ff}
+html[data-theme="light"] .app-shell{background:
+radial-gradient(circle at 12% 8%,rgba(255,22,143,.25) 0 8%,transparent 25%),
+radial-gradient(circle at 86% 18%,rgba(37,54,202,.2) 0 9%,transparent 30%),
+radial-gradient(circle at 70% 78%,rgba(9,214,208,.18),transparent 30%),
+linear-gradient(145deg,#fff1fa 0 14%,#f2efff 34%,#eaf6ff 66%,#fbfdff 100%)}
+html[data-theme="light"] .app-shell::before{opacity:.38;background-image:
+radial-gradient(circle,#51308f 0 1px,transparent 2px),
+radial-gradient(circle,#1e908f 0 2px,transparent 3px),
+radial-gradient(circle,#c12675 0 2px,transparent 3px)}
+html[data-theme="light"] .site-header{background:rgba(255,255,255,.82);border-bottom-color:rgba(52,39,101,.14);box-shadow:0 8px 30px rgba(52,39,101,.09);color:#12173f}
+html[data-theme="light"] .brand{color:#12173f}
+html[data-theme="light"] .icon-button,html[data-theme="light"] .streak-chip{background:#fff;color:#12173f;border-color:#cfd5ee;box-shadow:0 3px 12px rgba(40,31,92,.08)}
+html[data-theme="light"] .hero-copy{color:#12173f}
+html[data-theme="light"] .hero-copy h1{color:#12173f;text-shadow:0 5px 0 rgba(132,92,210,.13)}
+html[data-theme="light"] .hero-copy p{color:#4f5878}
+html[data-theme="light"] .eyebrow{color:#315e52;text-shadow:none}
+html[data-theme="light"] .game-screen,html[data-theme="light"] .results-screen{color:#12173f}
+html[data-theme="light"] .game-topbar .text-button,html[data-theme="light"] .progress-copy span{color:#37405f}
+html[data-theme="light"] .progress-copy strong{color:#12173f}
+html[data-theme="light"] .progress-track{background:rgba(42,34,94,.13);border-color:rgba(42,34,94,.14)}
+html[data-theme="light"] .progress-track span::after{box-shadow:0 0 0 4px #fff,0 0 15px #d99b00}
+html[data-theme="light"] .form-map{background:rgba(255,255,255,.84);border-color:#cbd1e9;color:#12173f;box-shadow:0 16px 42px rgba(48,35,102,.12)}
+html[data-theme="light"] .form-map-title,html[data-theme="light"] .form-map li.current{color:#12173f}
+html[data-theme="light"] .form-map li{border-color:#d9ddef;color:#4d567b}
+html[data-theme="light"] .form-map-title button{color:#55208e}
+html[data-theme="light"] .mori-panel{background:linear-gradient(135deg,#d4fbf8,#e3e7ff 48%,#ffd0e9);border-color:#202b86;box-shadow:7px 8px 0 #202b86,0 0 26px rgba(37,54,202,.17);color:#12173f}
+html[data-theme="light"] .mori-chat>span{color:#6a1767}
+html[data-theme="light"] .mori-chat p{color:#252b54}
+html[data-theme="light"] .meet-label{background:#fff;color:#12173f;border-color:#392467;box-shadow:0 0 0 4px #b6a3ff}
+html[data-theme="light"] .meet-label span{color:#505a7d}
+html[data-theme="light"] .speech-bubble{box-shadow:6px 7px 0 #e98fc1}
+html[data-theme="light"] .results-hero p{color:#4f5878}
+html[data-theme="light"] dialog::backdrop{background:rgba(31,25,70,.44)}
+
+@media(prefers-reduced-motion:reduce){.theme-toggle span{transition:none}}
