@@ -14,13 +14,14 @@
   const JLPT_LEVELS=['N5','N4','N3','N2','N1'];
 
   function show(name){Object.entries(screens).forEach(([k,e])=>e.classList.toggle('hidden',k!==name));window.scrollTo({top:0,behavior:'smooth'});}
-  function animateMascot(mood){
-    const className=`is-${mood}`,duration=mood==='cheering'?900:650;
+  function animateMascot(mood,temporary=false){
+    const className=`is-${mood}`,duration=mood==='cheering'?1200:750;
     document.querySelectorAll('.mascot').forEach(mascot=>{
       mascot.classList.remove('is-cheering','is-thinking');
+      if(mascot.dataset[mood])mascot.src=mascot.dataset[mood];
       void mascot.offsetWidth;
       mascot.classList.add(className);
-      setTimeout(()=>mascot.classList.remove(className),duration);
+      setTimeout(()=>{mascot.classList.remove(className);if(temporary)mascot.src=mascot.dataset.idle;},duration);
     });
   }
   function chooseAdaptive(avoid){
@@ -118,6 +119,14 @@
     if(['te','ta','tara'].includes(f.id))return `Listen for the sound change. The rule is: ${a.rule}。`;
     return `${state.verb.kanji} is ${state.verb.group}. Apply this rule: ${a.rule}。`;
   }
+  function katsuHint(i,value){
+    const f=ACTIVE_FORMS[i],a=state.verb.forms[f.id],tries=state.attempts[i],typed=normalize(value);
+    if(!typed)return `No rush—give me your best guess first. We’re changing ${state.verb.kanji} into the ${f.name.toLowerCase()}.`;
+    if(tries===1)return `Good attempt. Let’s slow the transformation down: ${state.verb.kanji} is a ${state.verb.group} verb, so listen for the ending change. ${a.rule}`;
+    if(tries===2)return `You’re getting warmer. Keep the stable part of the verb, then rebuild the ending. I’ve put the pieces in the hint below—try saying them aloud before typing.`;
+    if(tries===3)return `Almost there! Compare your answer with the filled-in pattern below. Only one small sound or character needs your attention.`;
+    return `Let’s learn it together: the answer is ${a.answer}. Type it once yourself, and I’ll help you remember the pattern next time.`;
+  }
 
   function exampleSentence(formId,answer){
     const examples={
@@ -170,8 +179,8 @@
     if(state.solved[i])return; state.attempts[i]++;
     if(!accepted(i,input.value)){
       const message=hint(i,input.value); input.classList.add('wrong'); setTimeout(()=>input.classList.remove('wrong'),400);
-      feedback.className='form-question-feedback error'; feedback.textContent=message; $('#companion-message').textContent=message;
-      animateMascot('thinking');
+      feedback.className='form-question-feedback error'; feedback.textContent=message; $('#companion-message').textContent=katsuHint(i,input.value);
+      animateMascot(state.attempts[i]===1?'thinking':'hinting');
       saved.misses[ACTIVE_FORMS[i].id]=(saved.misses[ACTIVE_FORMS[i].id]||0)+1;persist();return;
     }
     const a=state.verb.forms[ACTIVE_FORMS[i].id]; state.solved[i]=true; state.firstTry[i]=state.attempts[i]===1;
@@ -179,8 +188,8 @@
     feedback.className='form-question-feedback';feedback.textContent='✓ Correct!';
     const example=exampleDetails(ACTIVE_FORMS[i].id,a.answer,state.verb);
     form.insertAdjacentHTML('beforeend',`<div class="example-sentence"><span>REAL-LIFE EXAMPLE</span><p lang="ja">${example.japanese}</p><dl><div><dt>ひらがな</dt><dd lang="ja">${example.hiragana}</dd></div><div><dt>English</dt><dd>${example.english}</dd></div><div><dt>ไทย</dt><dd lang="th">${example.thai}</dd></div></dl></div><details><summary>How this form works</summary><p class="mini-explanation">${a.explanation}<br><strong>${a.rule}</strong></p></details>`);
-    $('#companion-message').textContent=['Great recall! Keep going.','Exactly right—nice transformation.','正解！ Another form complete.'][i%3];
-    animateMascot('cheering');
+    $('#companion-message').textContent=state.firstTry[i]?['That was instant recall—beautiful! Ready for the next transformation?','Exactly right on your first try. Your pattern memory is getting stronger!','正解！ You spotted the ending change immediately.'][i%3]:`Yes—that’s it! You worked through the clue and built ${a.answer} yourself. That recovery is how the pattern sticks.`;
+    animateMascot('cheering',true);
     $('#finish-button').innerHTML=i===FORM_COUNT-1?'See round results <span>→</span>':'Next form <span>→</span>';
     $('#finish-button').classList.remove('hidden');
     $('#finish-button').focus();
@@ -193,6 +202,7 @@
     renderCurrentForm();
     updateProgress();
     $('#companion-message').textContent=`Next: ${ACTIVE_FORMS[state.current].name}. Keep the ${state.verb.group} pattern in mind.`;
+    animateMascot('idle');
   }
 
   function finish(){
