@@ -191,7 +191,7 @@
     input.value=a.answer;input.disabled=true;input.className='correct';form.querySelector('button').disabled=true;form.classList.add('solved');
     feedback.className='form-question-feedback';feedback.textContent='✓ Correct!';
     const example=exampleDetails(ACTIVE_FORMS[i].id,a.answer,state.verb);
-    form.insertAdjacentHTML('beforeend',`<div class="example-sentence"><span>REAL-LIFE EXAMPLE</span><p lang="ja">${example.japanese}</p><dl><div><dt>ひらがな</dt><dd lang="ja">${example.hiragana}</dd></div><div><dt>English</dt><dd>${example.english}</dd></div><div><dt>ไทย</dt><dd lang="th">${example.thai}</dd></div></dl></div><details><summary>How this form works</summary><p class="mini-explanation">${a.explanation}<br><strong>${a.rule}</strong></p></details>`);
+    form.insertAdjacentHTML('beforeend',`<details class="answer-insight"><summary>See example & explanation <span>＋</span></summary><div class="example-sentence"><span>REAL-LIFE EXAMPLE</span><p lang="ja">${example.japanese}</p><dl><div><dt>ひらがな</dt><dd lang="ja">${example.hiragana}</dd></div><div><dt>English</dt><dd>${example.english}</dd></div><div><dt>ไทย</dt><dd lang="th">${example.thai}</dd></div></dl></div><p class="mini-explanation">${a.explanation}<br><strong>${a.rule}</strong></p></details>`);
     $('#companion-message').textContent=state.firstTry[i]?['That was instant recall—beautiful! Ready for the next transformation?','Exactly right on your first try. Your pattern memory is getting stronger!','正解！ You spotted the ending change immediately.'][i%3]:`Yes—that’s it! You worked through the clue and built ${a.answer} yourself. That recovery is how the pattern sticks.`;
     animateMascot('cheering',true);
     $('#finish-button').innerHTML=i===FORM_COUNT-1?'See round results <span>→</span>':'Next form <span>→</span>';
@@ -273,7 +273,9 @@
   $('#custom-verb-list').addEventListener('change',filterCustomVerbs);
   $('#select-visible').addEventListener('click',()=>{$('#custom-verb-list').querySelectorAll('label:not(.hidden) input').forEach(input=>input.checked=true);filterCustomVerbs();});
   $('#clear-custom').addEventListener('click',()=>{$('#custom-verb-list').querySelectorAll('input').forEach(input=>input.checked=false);filterCustomVerbs();});
-  $('#guide-toggle').addEventListener('click',e=>{const content=$('#guide-content'),hidden=content.classList.toggle('hidden');e.currentTarget.textContent=hidden?'Show':'Hide';e.currentTarget.setAttribute('aria-expanded',String(!hidden));});
+  $('#guide-toggle').addEventListener('click',e=>{const content=$('#guide-content'),hidden=content.classList.toggle('hidden');e.currentTarget.textContent=hidden?'Show reference ＋':'Hide reference −';e.currentTarget.setAttribute('aria-expanded',String(!hidden));});
+  $('#map-toggle').addEventListener('click',e=>{const list=$('#form-map-list'),hidden=list.classList.toggle('hidden');e.currentTarget.textContent=hidden?'Show ＋':'Hide −';e.currentTarget.setAttribute('aria-expanded',String(!hidden));});
+  $('#summary-toggle').addEventListener('click',e=>{const list=$('#summary-list'),hidden=list.classList.toggle('hidden');$('#expand-all').classList.toggle('hidden',hidden);e.currentTarget.textContent=hidden?'Show table ＋':'Hide table −';e.currentTarget.setAttribute('aria-expanded',String(!hidden));});
   document.addEventListener('keydown',e=>{
     if(e.key!=='Enter'||screens.game.classList.contains('hidden')||$('#finish-button').classList.contains('hidden'))return;
     if(e.target.closest('#history-dialog'))return;

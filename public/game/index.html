@@ -133,9 +133,9 @@
               <p id="form-description">Answer each form in order.</p>
               <div id="forms-grid" class="forms-grid"></div>
               <section class="conjugation-guide" id="conjugation-guide" aria-label="Verb conjugation reference">
-                <div class="guide-head"><div><span>CONJUGATION REFERENCE</span><strong id="guide-current-group">Godan pattern</strong></div><button type="button" id="guide-toggle" aria-expanded="true">Hide</button></div>
-                <div class="guide-content" id="guide-content">
-                  <details class="group-guide" data-guide-group="Godan" open>
+                <div class="guide-head"><div><span>CONJUGATION REFERENCE</span><strong id="guide-current-group">Godan pattern</strong></div><button type="button" id="guide-toggle" aria-expanded="false">Show reference ＋</button></div>
+                <div class="guide-content hidden" id="guide-content">
+                  <details class="group-guide" data-guide-group="Godan">
                     <summary>Godan sound changes</summary>
                     <div class="table-scroll"><table class="sound-table">
                       <thead><tr><th>Ending</th><th>あ row<br><small>ない・受身</small></th><th>い row<br><small>ます・たい</small></th><th>え row<br><small>可能・ば</small></th><th>お row<br><small>意向</small></th><th>て form</th><th>た form</th></tr></thead>
@@ -172,8 +172,8 @@
               <div class="mori-chat"><span>KATSU · AI COACH</span><p id="companion-message" aria-live="polite">Let’s warm up with a polite form. You’ve got this!</p></div>
             </div>
             <div class="form-map" aria-label="Conjugation progress">
-              <div class="form-map-title"><span>FORM CHECKLIST</span><strong id="map-count">0 / 19</strong></div>
-              <ol id="form-map-list"></ol>
+              <div class="form-map-title"><span>FORM CHECKLIST</span><strong id="map-count">0 / 19</strong><button type="button" id="map-toggle" aria-expanded="false">Show ＋</button></div>
+              <ol id="form-map-list" class="hidden"></ol>
             </div>
           </aside>
         </div>
@@ -193,8 +193,8 @@
         </div>
         <div class="summary-layout">
           <div class="summary-card">
-            <div class="summary-heading"><div><span>FULL CONJUGATION TABLE</span><h2 id="summary-verb">食べる · to eat</h2></div><button class="text-button" id="expand-all">Expand all</button></div>
-            <div id="summary-list"></div>
+            <div class="summary-heading"><div><span>FULL CONJUGATION TABLE</span><h2 id="summary-verb">食べる · to eat</h2></div><div><button class="text-button" id="summary-toggle" aria-expanded="false">Show table ＋</button><button class="text-button hidden" id="expand-all">Expand all</button></div></div>
+            <div id="summary-list" class="hidden"></div>
           </div>
           <aside>
             <div class="mori-panel results-mori"><img class="mascot" src="assets/katsuyo-mascot.png" data-idle="assets/katsuyo-mascot.png" data-thinking="assets/katsu-thinking-animated.webp" data-hinting="assets/katsu-hinting-animated.webp" data-cheering="assets/katsu-cheering-animated.webp" alt=""><div class="mori-chat"><span>KATSU’S NOTE</span><p id="results-message"></p></div></div>
