@@ -18,7 +18,11 @@
     const className=`is-${mood}`,duration=mood==='cheering'?1200:750;
     document.querySelectorAll('.mascot').forEach(mascot=>{
       mascot.classList.remove('is-cheering','is-thinking');
-      if(mascot.dataset[mood])mascot.src=mascot.dataset[mood];
+      if(mascot.dataset[mood]){
+        const source=new URL(mascot.dataset[mood],document.baseURI);
+        if(mood!=='idle')source.searchParams.set('play',String(Date.now()));
+        mascot.src=source.href;
+      }
       void mascot.offsetWidth;
       mascot.classList.add(className);
       setTimeout(()=>{mascot.classList.remove(className);if(temporary)mascot.src=mascot.dataset.idle;},duration);
