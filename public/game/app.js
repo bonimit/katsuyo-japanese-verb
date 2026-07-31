@@ -28,6 +28,20 @@
       setTimeout(()=>{mascot.classList.remove(className);if(temporary)mascot.src=mascot.dataset.idle;},duration);
     });
   }
+  function celebrateFrom(element){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    const rect=element.getBoundingClientRect(),colors=['#f4b4cf','#f08f58','#f7cf63','#a74063','#2f705d'];
+    for(let i=0;i<14;i++){
+      const particle=document.createElement('i');
+      particle.className='success-spark';
+      particle.style.setProperty('--spark-x',`${(Math.random()-.5)*150}px`);
+      particle.style.setProperty('--spark-y',`${-45-Math.random()*95}px`);
+      particle.style.setProperty('--spark-r',`${Math.random()*220-110}deg`);
+      particle.style.left=`${rect.left+rect.width/2}px`;particle.style.top=`${rect.top+rect.height/2}px`;
+      particle.style.background=colors[i%colors.length];
+      document.body.appendChild(particle);setTimeout(()=>particle.remove(),900);
+    }
+  }
   function chooseAdaptive(avoid){
     const recent=saved.history.filter(h=>h.jlpt&&h.formCount).slice(0,6);
     let targetIndex;
@@ -194,6 +208,7 @@
     form.insertAdjacentHTML('beforeend',`<details class="answer-insight"><summary>See example & explanation <span>＋</span></summary><div class="example-sentence"><span>REAL-LIFE EXAMPLE</span><p lang="ja">${example.japanese}</p><dl><div><dt>ひらがな</dt><dd lang="ja">${example.hiragana}</dd></div><div><dt>English</dt><dd>${example.english}</dd></div><div><dt>ไทย</dt><dd lang="th">${example.thai}</dd></div></dl></div><p class="mini-explanation">${a.explanation}<br><strong>${a.rule}</strong></p></details>`);
     $('#companion-message').textContent=state.firstTry[i]?['That was instant recall—beautiful! Ready for the next transformation?','Exactly right on your first try. Your pattern memory is getting stronger!','正解！ You spotted the ending change immediately.'][i%3]:`Yes—that’s it! You worked through the clue and built ${a.answer} yourself. That recovery is how the pattern sticks.`;
     animateMascot('cheering',true);
+    celebrateFrom(form.querySelector('.submit-answer'));
     $('#finish-button').innerHTML=i===FORM_COUNT-1?'See round results <span>→</span>':'Next form <span>→</span>';
     $('#finish-button').classList.remove('hidden');
     $('#finish-button').focus();
@@ -276,6 +291,7 @@
   $('#guide-toggle').addEventListener('click',e=>{const content=$('#guide-content'),hidden=content.classList.toggle('hidden');e.currentTarget.textContent=hidden?'Show reference ＋':'Hide reference −';e.currentTarget.setAttribute('aria-expanded',String(!hidden));});
   $('#map-toggle').addEventListener('click',e=>{const list=$('#form-map-list'),hidden=list.classList.toggle('hidden');e.currentTarget.textContent=hidden?'Show ＋':'Hide −';e.currentTarget.setAttribute('aria-expanded',String(!hidden));});
   $('#summary-toggle').addEventListener('click',e=>{const list=$('#summary-list'),hidden=list.classList.toggle('hidden');$('#expand-all').classList.toggle('hidden',hidden);e.currentTarget.textContent=hidden?'Show table ＋':'Hide table −';e.currentTarget.setAttribute('aria-expanded',String(!hidden));});
+  document.addEventListener('pointerdown',e=>{const button=e.target.closest('button');if(!button||button.disabled)return;const ripple=document.createElement('span'),rect=button.getBoundingClientRect();ripple.className='button-ripple';ripple.style.left=`${e.clientX-rect.left}px`;ripple.style.top=`${e.clientY-rect.top}px`;button.appendChild(ripple);setTimeout(()=>ripple.remove(),560);});
   document.addEventListener('keydown',e=>{
     if(e.key!=='Enter'||screens.game.classList.contains('hidden')||$('#finish-button').classList.contains('hidden'))return;
     if(e.target.closest('#history-dialog'))return;
