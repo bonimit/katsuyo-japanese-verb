@@ -14,6 +14,15 @@
   const JLPT_LEVELS=['N5','N4','N3','N2','N1'];
 
   function show(name){Object.entries(screens).forEach(([k,e])=>e.classList.toggle('hidden',k!==name));window.scrollTo({top:0,behavior:'smooth'});}
+  function animateMascot(mood){
+    const className=`is-${mood}`,duration=mood==='cheering'?900:650;
+    document.querySelectorAll('.mascot').forEach(mascot=>{
+      mascot.classList.remove('is-cheering','is-thinking');
+      void mascot.offsetWidth;
+      mascot.classList.add(className);
+      setTimeout(()=>mascot.classList.remove(className),duration);
+    });
+  }
   function chooseAdaptive(avoid){
     const recent=saved.history.filter(h=>h.jlpt&&h.formCount).slice(0,6);
     let targetIndex;
@@ -162,6 +171,7 @@
     if(!accepted(i,input.value)){
       const message=hint(i,input.value); input.classList.add('wrong'); setTimeout(()=>input.classList.remove('wrong'),400);
       feedback.className='form-question-feedback error'; feedback.textContent=message; $('#companion-message').textContent=message;
+      animateMascot('thinking');
       saved.misses[ACTIVE_FORMS[i].id]=(saved.misses[ACTIVE_FORMS[i].id]||0)+1;persist();return;
     }
     const a=state.verb.forms[ACTIVE_FORMS[i].id]; state.solved[i]=true; state.firstTry[i]=state.attempts[i]===1;
@@ -170,6 +180,7 @@
     const example=exampleDetails(ACTIVE_FORMS[i].id,a.answer,state.verb);
     form.insertAdjacentHTML('beforeend',`<div class="example-sentence"><span>REAL-LIFE EXAMPLE</span><p lang="ja">${example.japanese}</p><dl><div><dt>ひらがな</dt><dd lang="ja">${example.hiragana}</dd></div><div><dt>English</dt><dd>${example.english}</dd></div><div><dt>ไทย</dt><dd lang="th">${example.thai}</dd></div></dl></div><details><summary>How this form works</summary><p class="mini-explanation">${a.explanation}<br><strong>${a.rule}</strong></p></details>`);
     $('#companion-message').textContent=['Great recall! Keep going.','Exactly right—nice transformation.','正解！ Another form complete.'][i%3];
+    animateMascot('cheering');
     $('#finish-button').innerHTML=i===FORM_COUNT-1?'See round results <span>→</span>':'Next form <span>→</span>';
     $('#finish-button').classList.remove('hidden');
     $('#finish-button').focus();
@@ -194,7 +205,7 @@
     $('#summary-list').innerHTML=ACTIVE_FORMS.map((f,i)=>{const a=state.verb.forms[f.id],ex=exampleDetails(f.id,a.answer,state.verb);return `<details class="summary-row"><summary><span>${f.name}</span><strong>${a.answer}</strong><b>${state.firstTry[i]?'✓':`${state.attempts[i]} tries`}</b></summary><div class="summary-explanation"><div class="summary-example"><strong lang="ja">${ex.japanese}</strong><br><span lang="ja">${ex.hiragana}</span><br>${ex.english}<br><span lang="th">${ex.thai}</span></div>${a.explanation}<br><strong>${a.rule}</strong></div></details>`}).join('');
     $('#results-message').textContent=tough?`Good work. Let’s revisit ${tough.name.toLowerCase()} next round.`:'A clean round—you recalled every form first time!';
     $('#weak-title').textContent=tough?tough.name:'Try a new verb group';$('#weak-description').textContent=tough?state.verb.forms[tough.id].rule:'Keep your transformation rules flexible.';
-    updateHeader();show('results');
+    updateHeader();show('results');animateMascot('cheering');
   }
 
   function updateHeader(){$('#streak-count').textContent=saved.streak;$('#sound-toggle').setAttribute('aria-pressed',String(saved.sound));$('#sound-toggle span').textContent=saved.sound?'♪':'×';}
