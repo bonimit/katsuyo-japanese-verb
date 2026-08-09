@@ -1,10 +1,10 @@
 (() => {
   'use strict';
   const $ = s => document.querySelector(s);
-  const ACTIVE_FORMS = FORMS;
-  const FORM_COUNT = ACTIVE_FORMS.length;
+  let ACTIVE_FORMS = [...FORMS];
+  let FORM_COUNT = ACTIVE_FORMS.length;
   const key = 'kotobaQuest.v2';
-  const defaults = { reading:'kanji', sound:true, theme:null, streak:0, lastPlayed:null, history:[], misses:{}, customVerbIds:[] };
+  const defaults = { reading:'kanji', sound:true, theme:null, streak:0, lastPlayed:null, history:[], misses:{}, formStats:{}, practiceMode:'all', customVerbIds:[] };
   let saved;
   try { saved = { ...defaults, ...JSON.parse(localStorage.getItem(key) || '{}') }; } catch { saved = {...defaults}; }
   const systemTheme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
@@ -77,6 +77,26 @@
     const pool=d.length?d:p;
     return pool[Math.floor(Math.random()*pool.length)];
   }
+  function chooseAdaptiveForms(){
+    const previous=new Set((saved.history[0]?.formIds)||[]);
+    const ranked=FORMS.map(form=>{
+      const stats=saved.formStats[form.id]||{rounds:0,firstTry:0,attempts:0};
+      const unseen=stats.rounds===0;
+      const accuracy=unseen?0:stats.firstTry/stats.rounds;
+      const effort=unseen?0:Math.max(0,stats.attempts/stats.rounds-1);
+      const misses=saved.misses[form.id]||0;
+      const weakness=(1-accuracy)*4+Math.min(effort,3)*1.4+Math.min(misses,8)*.3;
+      const discovery=unseen?5:0;
+      const repeatPenalty=previous.has(form.id)?1.1:0;
+      return {form,score:weakness+discovery-repeatPenalty+Math.random()*3.2,unseen};
+    }).sort((a,b)=>b.score-a.score);
+    const picked=ranked.slice(0,7);
+    const weakCount=picked.filter(x=>!x.unseen).length;
+    state.formReason=saved.history.length
+      ?`AI mixed ${weakCount} priority forms with fresh random practice based on your previous accuracy.`
+      :'AI created a varied seven-form baseline to learn your strengths.';
+    return picked.map(x=>x.form);
+  }
   function acceptedAnswers(i){
     const a=state.verb.forms[ACTIVE_FORMS[i].id];
     const candidates=[a.answer,...a.alternatives];
@@ -95,12 +115,15 @@
     return saved.reading==='kanji' && state.verb.furigana ? state.verb.furigana : state.verb.kanji;
   }
 
-  function startRound(verb){
-    state={verb,difficulty:state.difficulty||'beginner',verbSource:state.verbSource||'difficulty',adaptiveReason:state.adaptiveReason||'',current:0,attempts:Array(FORM_COUNT).fill(0),solved:Array(FORM_COUNT).fill(false),firstTry:Array(FORM_COUNT).fill(false)};
+  function startRound(verb,preserveForms=false){
+    const config={difficulty:state.difficulty||'beginner',verbSource:state.verbSource||'difficulty',adaptiveReason:state.adaptiveReason||'',practiceMode:state.practiceMode||saved.practiceMode||'all',formReason:state.formReason||''};
+    if(!preserveForms){ACTIVE_FORMS=config.practiceMode==='adaptive'?chooseAdaptiveForms():[...FORMS];FORM_COUNT=ACTIVE_FORMS.length;}
+    state={verb,...config,formReason:state.formReason||config.formReason,current:0,attempts:Array(FORM_COUNT).fill(0),solved:Array(FORM_COUNT).fill(false),firstTry:Array(FORM_COUNT).fill(false)};
     $('#verb-display').innerHTML=displayVerb(); $('#verb-reading').textContent=verb.reading;
     $('#verb-romaji').textContent=verb.romaji;
     $('#verb-meaning').textContent=verb.meaning; $('#verb-group').textContent=`${verb.jlpt} · ${verb.group} verb`;
-    $('#companion-message').textContent=state.difficulty==='adaptive'&&state.verbSource==='difficulty'?state.adaptiveReason:`One verb, ${FORM_COUNT} core forms. We’ll work through them in order.`;
+    const verbReason=state.difficulty==='adaptive'&&state.verbSource==='difficulty'?`${state.adaptiveReason} `:'';
+    $('#companion-message').textContent=state.practiceMode==='adaptive'?`${verbReason}${state.formReason}`:verbReason||`One verb, ${FORM_COUNT} core forms. We’ll work through them in order.`;
     renderMap(); renderCurrentForm(); updateProgress(); updateConjugationGuide(); show('game');
   }
 
@@ -214,7 +237,8 @@
       animateMascot(state.attempts[i]===1?'thinking':'hinting');
       saved.misses[ACTIVE_FORMS[i].id]=(saved.misses[ACTIVE_FORMS[i].id]||0)+1;persist();return;
     }
-    const a=state.verb.forms[ACTIVE_FORMS[i].id]; state.solved[i]=true; state.firstTry[i]=state.attempts[i]===1;
+    const formId=ACTIVE_FORMS[i].id,a=state.verb.forms[formId]; state.solved[i]=true; state.firstTry[i]=state.attempts[i]===1;
+    const stats=saved.formStats[formId]||{rounds:0,firstTry:0,attempts:0};stats.rounds++;stats.attempts+=state.attempts[i];if(state.firstTry[i])stats.firstTry++;saved.formStats[formId]=stats;persist();
     input.value=a.answer;input.disabled=true;input.className='correct';form.querySelector('button').disabled=true;form.classList.add('solved');
     feedback.className='form-question-feedback';feedback.textContent='✓ Correct!';
     const example=exampleDetails(ACTIVE_FORMS[i].id,a.answer,state.verb);
@@ -240,7 +264,7 @@
   function finish(){
     const today=new Date().toISOString().slice(0,10), total=state.attempts.reduce((a,b)=>a+b,0), score=state.firstTry.filter(Boolean).length;
     if(saved.lastPlayed!==today){const y=new Date(Date.now()-86400000).toISOString().slice(0,10);saved.streak=saved.lastPlayed===y?saved.streak+1:1;saved.lastPlayed=today;}
-    saved.history.unshift({date:today,verb:state.verb.kanji,jlpt:state.verb.jlpt,attempts:total,firstTry:score,formCount:FORM_COUNT});saved.history=saved.history.slice(0,20);persist();
+    saved.history.unshift({date:today,verb:state.verb.kanji,jlpt:state.verb.jlpt,attempts:total,firstTry:score,formCount:FORM_COUNT,practiceMode:state.practiceMode,formIds:ACTIVE_FORMS.map(f=>f.id)});saved.history=saved.history.slice(0,20);persist();
     const max=Math.max(...state.attempts), tough=max>1?ACTIVE_FORMS[state.attempts.indexOf(max)]:null;
     $('#accuracy-score').textContent=`${score}/${FORM_COUNT}`;$('#attempt-score').textContent=total;$('#toughest-score').textContent=tough?tough.name:'None';$('#toughest-note').textContent=tough?`${max} attempts`:'Smooth round';
     $('#summary-verb').textContent=`${state.verb.kanji} · ${state.verb.meaning}`;$('#results-subtitle').textContent=`You completed all ${FORM_COUNT} forms of ${state.verb.kanji}.`;
@@ -286,11 +310,11 @@
       saved.customVerbIds=d.getAll('customVerb');
       if(!saved.customVerbIds.length){$('#custom-verb-error').textContent='Select at least one verb for your custom group.';return;}
     }
-    $('#custom-verb-error').textContent='';state.difficulty=d.get('difficulty');state.verbSource=source;saved.reading=d.get('reading');persist();startRound(choose(state.difficulty,null,source));
+    $('#custom-verb-error').textContent='';state.difficulty=d.get('difficulty');state.verbSource=source;state.practiceMode=d.get('practiceMode');saved.reading=d.get('reading');saved.practiceMode=state.practiceMode;persist();startRound(choose(state.difficulty,null,source));
   });
   $('#forms-grid').addEventListener('click',e=>{if(e.target.closest('#finish-button'))nextForm();});$('#quit-button').addEventListener('click',()=>show('welcome'));
   $('#reading-toggle').addEventListener('click',()=>{saved.reading=saved.reading==='kanji'?'hiragana':'kanji';persist();$('#verb-display').innerHTML=displayVerb();$('#reading-toggle').textContent=saved.reading==='kanji'?'漢 Kanji only':'ふ Furigana';});
-  $('#retry-button').addEventListener('click',()=>startRound(state.verb));$('#new-verb-button').addEventListener('click',()=>startRound(choose(state.difficulty,state.verb.id,state.verbSource)));
+  $('#retry-button').addEventListener('click',()=>startRound(state.verb,true));$('#new-verb-button').addEventListener('click',()=>startRound(choose(state.difficulty,state.verb.id,state.verbSource)));
   $('#expand-all').addEventListener('click',e=>{const rows=[...document.querySelectorAll('.summary-row')],open=rows.some(r=>!r.open);rows.forEach(r=>r.open=open);e.currentTarget.textContent=open?'Collapse all':'Expand all';});
   $('#sound-toggle').addEventListener('click',()=>{saved.sound=!saved.sound;persist();updateHeader();});
   $('#theme-toggle').addEventListener('click',()=>{saved.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';persist();applyTheme(saved.theme);});
@@ -300,6 +324,7 @@
   $('#verb-search').addEventListener('input',filterCustomVerbs);
   $('.catalog-filters').addEventListener('change',filterCustomVerbs);
   $('#custom-verb-list').addEventListener('change',filterCustomVerbs);
+  document.querySelectorAll('[name="practiceMode"]').forEach(input=>input.addEventListener('change',()=>{$('#setup-note').textContent=input.value==='adaptive'?'1 verb · 7 AI-selected conjugations':'1 verb · 19 core conjugations';}));
   $('#select-visible').addEventListener('click',()=>{$('#custom-verb-list').querySelectorAll('label:not(.hidden) input').forEach(input=>input.checked=true);filterCustomVerbs();});
   $('#clear-custom').addEventListener('click',()=>{$('#custom-verb-list').querySelectorAll('input').forEach(input=>input.checked=false);filterCustomVerbs();});
   $('#guide-toggle').addEventListener('click',e=>{const content=$('#guide-content'),hidden=content.classList.toggle('hidden');e.currentTarget.textContent=hidden?'Show reference ＋':'Hide reference −';e.currentTarget.setAttribute('aria-expanded',String(!hidden));});
@@ -314,6 +339,7 @@
   });
   buildVerbSelector();
   document.querySelector(`input[name="reading"][value="${saved.reading}"]`).checked=true;
+  const savedPracticeMode=document.querySelector(`input[name="practiceMode"][value="${saved.practiceMode}"]`);if(savedPracticeMode){savedPracticeMode.checked=true;$('#setup-note').textContent=saved.practiceMode==='adaptive'?'1 verb · 7 AI-selected conjugations':'1 verb · 19 core conjugations';}
   $('#reading-toggle').textContent=saved.reading==='kanji'?'漢 Kanji only':'ふ Furigana';
   updateHeader();
 })();

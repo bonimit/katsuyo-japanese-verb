@@ -105,8 +105,20 @@
               </fieldset>
             </div>
 
+            <div class="step-label">04 <span>CHOOSE PRACTICE FORMS</span></div>
+            <div class="reading-options practice-mode-options" role="radiogroup" aria-label="Conjugation form selection">
+              <label>
+                <input type="radio" name="practiceMode" value="all" checked>
+                <span class="reading-card"><b>All forms</b><small>19 forms in order</small><i aria-hidden="true">✓</i></span>
+              </label>
+              <label>
+                <input type="radio" name="practiceMode" value="adaptive">
+                <span class="reading-card"><b>AI selective</b><small>7 targeted + random forms</small><i aria-hidden="true">✓</i></span>
+              </label>
+            </div>
+
             <button class="primary-button" type="submit">Start today’s quest <span aria-hidden="true">→</span></button>
-            <p class="setup-note">1 verb · 19 core conjugations</p>
+            <p class="setup-note" id="setup-note">1 verb · 19 core conjugations</p>
           </form>
 
           <aside class="companion-intro" aria-label="Meet your companion">

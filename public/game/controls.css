@@ -28,3 +28,4 @@
 .kana-keys button:hover,.kana-keys button:focus-visible{background:var(--mint);outline:2px solid var(--mint-dark)}
 .kana-keys .key-wide{grid-column:span 2;font-family:"DM Sans";font-size:11px}
 @media(max-width:560px){.segmented{grid-template-columns:1fr}#custom-verb-list{grid-template-columns:1fr}.catalog-filters{grid-template-columns:1fr}.kana-keys{grid-template-columns:repeat(5,1fr)}.kana-keys button{min-height:42px}}
+.practice-mode-options .reading-card b{font-family:"DM Sans","Noto Sans JP",sans-serif;font-size:15px}.practice-mode-options .reading-card{min-height:72px;justify-content:center}
