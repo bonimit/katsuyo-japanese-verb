@@ -15,6 +15,28 @@
   const normalize = v => v.trim().replace(/[\s　・,.。!！?？]/g,'').normalize('NFKC');
   const screens = {welcome:$('#welcome-screen'),game:$('#game-screen'),results:$('#results-screen')};
   const JLPT_LEVELS=['N5','N4','N3','N2','N1'];
+  let audioContext;
+
+  function playSound(kind){
+    if(!saved.sound)return;
+    const AudioEngine=window.AudioContext||window.webkitAudioContext;if(!AudioEngine)return;
+    audioContext ||= new AudioEngine();if(audioContext.state==='suspended')audioContext.resume();
+    const patterns={
+      start:[[392,0,.07,.018,'sine'],[523.25,.07,.1,.022,'sine']],
+      correct:[[523.25,0,.08,.025,'sine'],[659.25,.065,.11,.026,'sine']],
+      wrong:[[220,0,.1,.018,'triangle'],[185,.085,.13,.014,'triangle']],
+      next:[[440,0,.065,.016,'sine']],
+      complete:[[523.25,0,.1,.022,'sine'],[659.25,.09,.1,.023,'sine'],[783.99,.18,.12,.024,'sine'],[1046.5,.29,.2,.022,'sine']],
+      toggle:[[587.33,0,.08,.015,'sine']]
+    };
+    const now=audioContext.currentTime;
+    (patterns[kind]||patterns.next).forEach(([frequency,delay,duration,volume,type])=>{
+      const oscillator=audioContext.createOscillator(),gain=audioContext.createGain();
+      oscillator.type=type;oscillator.frequency.setValueAtTime(frequency,now+delay);
+      gain.gain.setValueAtTime(.0001,now+delay);gain.gain.exponentialRampToValueAtTime(volume,now+delay+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+delay+duration);
+      oscillator.connect(gain);gain.connect(audioContext.destination);oscillator.start(now+delay);oscillator.stop(now+delay+duration+.02);
+    });
+  }
 
   function show(name){Object.entries(screens).forEach(([k,e])=>e.classList.toggle('hidden',k!==name));window.scrollTo({top:0,behavior:'smooth'});}
   function animateMascot(mood,temporary=false){
@@ -125,6 +147,7 @@
     const verbReason=state.difficulty==='adaptive'&&state.verbSource==='difficulty'?`${state.adaptiveReason} `:'';
     $('#companion-message').textContent=state.practiceMode==='adaptive'?`${verbReason}${state.formReason}`:verbReason||`One verb, ${FORM_COUNT} core forms. We’ll work through them in order.`;
     renderMap(); renderCurrentForm(); updateProgress(); updateConjugationGuide(); show('game');
+    playSound('start');
   }
 
   function renderCurrentForm(){
@@ -232,12 +255,14 @@
     e.preventDefault(); const form=e.currentTarget,i=Number(form.dataset.index),input=form.querySelector('input'),feedback=form.querySelector('.form-question-feedback');
     if(state.solved[i])return; state.attempts[i]++;
     if(!accepted(i,input.value)){
+      playSound('wrong');
       const message=hint(i,input.value); input.classList.add('wrong'); setTimeout(()=>input.classList.remove('wrong'),400);
       feedback.className='form-question-feedback error'; feedback.textContent=message; $('#companion-message').textContent=katsuHint(i,input.value);
       animateMascot(state.attempts[i]===1?'thinking':'hinting');
       saved.misses[ACTIVE_FORMS[i].id]=(saved.misses[ACTIVE_FORMS[i].id]||0)+1;persist();return;
     }
     const formId=ACTIVE_FORMS[i].id,a=state.verb.forms[formId]; state.solved[i]=true; state.firstTry[i]=state.attempts[i]===1;
+    playSound('correct');
     const stats=saved.formStats[formId]||{rounds:0,firstTry:0,attempts:0};stats.rounds++;stats.attempts+=state.attempts[i];if(state.firstTry[i])stats.firstTry++;saved.formStats[formId]=stats;persist();
     input.value=a.answer;input.disabled=true;input.className='correct';form.querySelector('button').disabled=true;form.classList.add('solved');
     feedback.className='form-question-feedback';feedback.textContent='✓ Correct!';
@@ -254,6 +279,7 @@
 
   function nextForm(){
     if(state.current===FORM_COUNT-1){finish();return;}
+    playSound('next');
     state.current++;
     renderCurrentForm();
     updateProgress();
@@ -262,6 +288,7 @@
   }
 
   function finish(){
+    playSound('complete');
     const today=new Date().toISOString().slice(0,10), total=state.attempts.reduce((a,b)=>a+b,0), score=state.firstTry.filter(Boolean).length;
     if(saved.lastPlayed!==today){const y=new Date(Date.now()-86400000).toISOString().slice(0,10);saved.streak=saved.lastPlayed===y?saved.streak+1:1;saved.lastPlayed=today;}
     saved.history.unshift({date:today,verb:state.verb.kanji,jlpt:state.verb.jlpt,attempts:total,firstTry:score,formCount:FORM_COUNT,practiceMode:state.practiceMode,formIds:ACTIVE_FORMS.map(f=>f.id)});saved.history=saved.history.slice(0,20);persist();
@@ -274,7 +301,7 @@
     updateHeader();show('results');animateMascot('cheering');
   }
 
-  function updateHeader(){$('#streak-count').textContent=saved.streak;$('#sound-toggle').setAttribute('aria-pressed',String(saved.sound));$('#sound-toggle span').textContent=saved.sound?'♪':'×';applyTheme(saved.theme||systemTheme);}
+  function updateHeader(){$('#streak-count').textContent=saved.streak;$('#sound-toggle').setAttribute('aria-pressed',String(saved.sound));$('#sound-toggle').setAttribute('aria-label',saved.sound?'Turn sound off':'Turn sound on');$('#sound-toggle').title=saved.sound?'Sound on':'Sound off';$('#sound-toggle span').textContent=saved.sound?'♪':'×';applyTheme(saved.theme||systemTheme);}
   function buildVerbSelector(){
     $('#custom-verb-list').innerHTML=VERBS.map(v=>{const type=verbType(v);return `<label data-jlpt="${v.jlpt}" data-group="${v.group.split(' ')[0]}" data-type="${type}" data-search="${`${v.kanji} ${v.reading} ${v.romaji} ${v.meaning}`.toLowerCase()}"><input type="checkbox" name="customVerb" value="${v.id}" ${saved.customVerbIds.includes(v.id)?'checked':''}><span><strong>${v.kanji}</strong> <span class="verb-kana">${v.reading}</span><br><span class="verb-romaji">${v.romaji}</span> · ${v.meaning}<br><small>${v.jlpt} · ${v.group} · ${type}</small></span></label>`}).join('');
     $('#verb-count').textContent=`${VERBS.length.toLocaleString()} verbs available`;
@@ -316,7 +343,7 @@
   $('#reading-toggle').addEventListener('click',()=>{saved.reading=saved.reading==='kanji'?'hiragana':'kanji';persist();$('#verb-display').innerHTML=displayVerb();$('#reading-toggle').textContent=saved.reading==='kanji'?'漢 Kanji only':'ふ Furigana';});
   $('#retry-button').addEventListener('click',()=>startRound(state.verb,true));$('#new-verb-button').addEventListener('click',()=>startRound(choose(state.difficulty,state.verb.id,state.verbSource)));
   $('#expand-all').addEventListener('click',e=>{const rows=[...document.querySelectorAll('.summary-row')],open=rows.some(r=>!r.open);rows.forEach(r=>r.open=open);e.currentTarget.textContent=open?'Collapse all':'Expand all';});
-  $('#sound-toggle').addEventListener('click',()=>{saved.sound=!saved.sound;persist();updateHeader();});
+  $('#sound-toggle').addEventListener('click',()=>{saved.sound=!saved.sound;persist();updateHeader();if(saved.sound)playSound('toggle');});
   $('#theme-toggle').addEventListener('click',()=>{saved.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';persist();applyTheme(saved.theme);});
   $('#history-button').addEventListener('click',()=>{$('#history-content').innerHTML=saved.history.length?saved.history.map(x=>`<div class="history-item"><span><strong>${x.verb}</strong> ${x.jlpt?`<small>${x.jlpt}</small>`:''}<br>${x.date}</span><span>${x.firstTry}/${x.formCount||7} first try<br>${x.attempts} attempts</span></div>`).join(''):'<p class="history-empty">Complete your first quest to start a practice history.</p>';$('#history-dialog').showModal();});
   $('.dialog-close').addEventListener('click',()=>$('#history-dialog').close());
