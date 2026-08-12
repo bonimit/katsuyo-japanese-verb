@@ -29,7 +29,10 @@
       </a>
       <div class="header-actions">
         <button class="icon-button theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Switch color theme"><span aria-hidden="true">☀</span></button>
-        <button class="icon-button" id="sound-toggle" aria-label="Turn sound off" aria-pressed="true"><span aria-hidden="true">♪</span></button>
+        <div class="sound-controls">
+          <button class="icon-button" id="sound-toggle" aria-label="Turn sound off" aria-pressed="true"><span aria-hidden="true">♪</span></button>
+          <label class="volume-control" for="sound-volume"><span class="sr-only">Sound volume</span><input id="sound-volume" type="range" min="0" max="100" step="5" value="35" aria-label="Sound volume"><output id="volume-value" for="sound-volume">35%</output></label>
+        </div>
         <button class="streak-chip" id="history-button" aria-label="Show practice history"><span aria-hidden="true">✦</span> <strong id="streak-count">0</strong> day streak</button>
       </div>
     </header>

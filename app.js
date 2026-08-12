@@ -4,7 +4,7 @@
   let ACTIVE_FORMS = [...FORMS];
   let FORM_COUNT = ACTIVE_FORMS.length;
   const key = 'kotobaQuest.v2';
-  const defaults = { reading:'kanji', sound:true, theme:null, streak:0, lastPlayed:null, history:[], misses:{}, formStats:{}, practiceMode:'all', customVerbIds:[] };
+  const defaults = { reading:'kanji', sound:true, soundVolume:35, theme:null, streak:0, lastPlayed:null, history:[], misses:{}, formStats:{}, practiceMode:'all', customVerbIds:[] };
   let saved;
   try { saved = { ...defaults, ...JSON.parse(localStorage.getItem(key) || '{}') }; } catch { saved = {...defaults}; }
   const systemTheme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
@@ -33,7 +33,7 @@
     (patterns[kind]||patterns.next).forEach(([frequency,delay,duration,volume,type])=>{
       const oscillator=audioContext.createOscillator(),gain=audioContext.createGain();
       oscillator.type=type;oscillator.frequency.setValueAtTime(frequency,now+delay);
-      gain.gain.setValueAtTime(.0001,now+delay);gain.gain.exponentialRampToValueAtTime(volume,now+delay+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+delay+duration);
+      const level=volume*(saved.soundVolume/100);gain.gain.setValueAtTime(.0001,now+delay);gain.gain.exponentialRampToValueAtTime(Math.max(.0001,level),now+delay+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+delay+duration);
       oscillator.connect(gain);gain.connect(audioContext.destination);oscillator.start(now+delay);oscillator.stop(now+delay+duration+.02);
     });
   }
@@ -131,6 +131,13 @@
     return [...new Set(candidates.map(normalize))];
   }
   function accepted(i,value){return acceptedAnswers(i).includes(normalize(value));}
+  function kanaAnswer(i){const a=state.verb.forms[ACTIVE_FORMS[i].id];return a.alternatives.find(x=>/^[ぁ-ゖー]+$/.test(x))||a.answer;}
+  function kanaToRomaji(value){
+    const pairs={きゃ:'kya',きゅ:'kyu',きょ:'kyo',しゃ:'sha',しゅ:'shu',しょ:'sho',ちゃ:'cha',ちゅ:'chu',ちょ:'cho',にゃ:'nya',にゅ:'nyu',にょ:'nyo',ひゃ:'hya',ひゅ:'hyu',ひょ:'hyo',みゃ:'mya',みゅ:'myu',みょ:'myo',りゃ:'rya',りゅ:'ryu',りょ:'ryo',ぎゃ:'gya',ぎゅ:'gyu',ぎょ:'gyo',じゃ:'ja',じゅ:'ju',じょ:'jo',びゃ:'bya',びゅ:'byu',びょ:'byo',ぴゃ:'pya',ぴゅ:'pyu',ぴょ:'pyo'};
+    const singles={あ:'a',い:'i',う:'u',え:'e',お:'o',か:'ka',き:'ki',く:'ku',け:'ke',こ:'ko',さ:'sa',し:'shi',す:'su',せ:'se',そ:'so',た:'ta',ち:'chi',つ:'tsu',て:'te',と:'to',な:'na',に:'ni',ぬ:'nu',ね:'ne',の:'no',は:'ha',ひ:'hi',ふ:'fu',へ:'he',ほ:'ho',ま:'ma',み:'mi',む:'mu',め:'me',も:'mo',や:'ya',ゆ:'yu',よ:'yo',ら:'ra',り:'ri',る:'ru',れ:'re',ろ:'ro',わ:'wa',を:'wo',ん:'n',が:'ga',ぎ:'gi',ぐ:'gu',げ:'ge',ご:'go',ざ:'za',じ:'ji',ず:'zu',ぜ:'ze',ぞ:'zo',だ:'da',ぢ:'ji',づ:'zu',で:'de',ど:'do',ば:'ba',び:'bi',ぶ:'bu',べ:'be',ぼ:'bo',ぱ:'pa',ぴ:'pi',ぷ:'pu',ぺ:'pe',ぽ:'po'};
+    let result='',double=false;for(let i=0;i<value.length;i++){const char=value[i];if(char==='っ'){double=true;continue;}const pair=pairs[value.slice(i,i+2)];let syllable=pair||singles[char]||char;if(pair)i++;if(double){const consonant=syllable.match(/^[bcdfghjklmnpqrstvwxyz]/)?.[0];if(consonant)syllable=consonant+syllable;double=false;}if(char==='ー'){const vowel=result.match(/[aeiou]$/)?.[0]||'';syllable=vowel;}result+=syllable;}return result;
+  }
+  function typingGuide(i){const kana=kanaAnswer(i);return {kana,romaji:kanaToRomaji(kana)};}
   function displayVerb(){
     const hasKanji=/[一-龯々]/.test(state.verb.kanji);
     if(!hasKanji)return state.verb.reading;
@@ -256,8 +263,9 @@
     if(state.solved[i])return; state.attempts[i]++;
     if(!accepted(i,input.value)){
       playSound('wrong');
+      const typing=typingGuide(i);
       const message=hint(i,input.value); input.classList.add('wrong'); setTimeout(()=>input.classList.remove('wrong'),400);
-      feedback.className='form-question-feedback error'; feedback.textContent=message; $('#companion-message').textContent=katsuHint(i,input.value);
+      feedback.className='form-question-feedback error'; feedback.innerHTML=`${message}<span class="romaji-type-guide">Phone or keyboard: type <code>${typing.romaji}</code> to produce <span lang="ja">${typing.kana}</span>.</span>`; $('#companion-message').textContent=`${katsuHint(i,input.value)} Type “${typing.romaji}” with a Japanese romaji keyboard.`;
       animateMascot(state.attempts[i]===1?'thinking':'hinting');
       saved.misses[ACTIVE_FORMS[i].id]=(saved.misses[ACTIVE_FORMS[i].id]||0)+1;persist();return;
     }
@@ -266,8 +274,8 @@
     const stats=saved.formStats[formId]||{rounds:0,firstTry:0,attempts:0};stats.rounds++;stats.attempts+=state.attempts[i];if(state.firstTry[i])stats.firstTry++;saved.formStats[formId]=stats;persist();
     input.value=a.answer;input.disabled=true;input.className='correct';form.querySelector('button').disabled=true;form.classList.add('solved');
     feedback.className='form-question-feedback';feedback.textContent='✓ Correct!';
-    const example=exampleDetails(ACTIVE_FORMS[i].id,a.answer,state.verb);
-    form.insertAdjacentHTML('beforeend',`<details class="answer-insight"><summary>See example & explanation <span>＋</span></summary><div class="example-sentence"><span>REAL-LIFE EXAMPLE</span><p lang="ja">${example.japanese}</p><dl><div><dt>ひらがな</dt><dd lang="ja">${example.hiragana}</dd></div><div><dt>English</dt><dd>${example.english}</dd></div><div><dt>ไทย</dt><dd lang="th">${example.thai}</dd></div></dl></div><p class="mini-explanation">${a.explanation}<br><strong>${a.rule}</strong></p></details>`);
+    const example=exampleDetails(ACTIVE_FORMS[i].id,a.answer,state.verb),typing=typingGuide(i);
+    form.insertAdjacentHTML('beforeend',`<details class="answer-insight"><summary>See example & explanation <span>＋</span></summary><div class="romaji-type-guide">HOW TO TYPE · <code>${typing.romaji}</code> → <span lang="ja">${typing.kana}</span><br><small>Choose the Japanese romaji keyboard on your phone or computer, then type the letters shown.</small></div><div class="example-sentence"><span>REAL-LIFE EXAMPLE</span><p lang="ja">${example.japanese}</p><dl><div><dt>ひらがな</dt><dd lang="ja">${example.hiragana}</dd></div><div><dt>English</dt><dd>${example.english}</dd></div><div><dt>ไทย</dt><dd lang="th">${example.thai}</dd></div></dl></div><p class="mini-explanation">${a.explanation}<br><strong>${a.rule}</strong></p></details>`);
     $('#companion-message').textContent=state.firstTry[i]?['That was instant recall—beautiful! Ready for the next transformation?','Exactly right on your first try. Your pattern memory is getting stronger!','正解！ You spotted the ending change immediately.'][i%3]:`Yes—that’s it! You worked through the clue and built ${a.answer} yourself. That recovery is how the pattern sticks.`;
     animateMascot('cheering',true);
     celebrateFrom(form.querySelector('.submit-answer'));
@@ -301,7 +309,7 @@
     updateHeader();show('results');animateMascot('cheering');
   }
 
-  function updateHeader(){$('#streak-count').textContent=saved.streak;$('#sound-toggle').setAttribute('aria-pressed',String(saved.sound));$('#sound-toggle').setAttribute('aria-label',saved.sound?'Turn sound off':'Turn sound on');$('#sound-toggle').title=saved.sound?'Sound on':'Sound off';$('#sound-toggle span').textContent=saved.sound?'♪':'×';applyTheme(saved.theme||systemTheme);}
+  function updateHeader(){$('#streak-count').textContent=saved.streak;$('#sound-toggle').setAttribute('aria-pressed',String(saved.sound));$('#sound-toggle').setAttribute('aria-label',saved.sound?'Turn sound off':'Turn sound on');$('#sound-toggle').title=saved.sound?'Sound on':'Sound off';$('#sound-toggle span').textContent=saved.sound?'♪':'×';$('#sound-volume').value=saved.soundVolume;$('#volume-value').value=`${saved.soundVolume}%`;applyTheme(saved.theme||systemTheme);}
   function buildVerbSelector(){
     $('#custom-verb-list').innerHTML=VERBS.map(v=>{const type=verbType(v);return `<label data-jlpt="${v.jlpt}" data-group="${v.group.split(' ')[0]}" data-type="${type}" data-search="${`${v.kanji} ${v.reading} ${v.romaji} ${v.meaning}`.toLowerCase()}"><input type="checkbox" name="customVerb" value="${v.id}" ${saved.customVerbIds.includes(v.id)?'checked':''}><span><strong>${v.kanji}</strong> <span class="verb-kana">${v.reading}</span><br><span class="verb-romaji">${v.romaji}</span> · ${v.meaning}<br><small>${v.jlpt} · ${v.group} · ${type}</small></span></label>`}).join('');
     $('#verb-count').textContent=`${VERBS.length.toLocaleString()} verbs available`;
@@ -344,6 +352,8 @@
   $('#retry-button').addEventListener('click',()=>startRound(state.verb,true));$('#new-verb-button').addEventListener('click',()=>startRound(choose(state.difficulty,state.verb.id,state.verbSource)));
   $('#expand-all').addEventListener('click',e=>{const rows=[...document.querySelectorAll('.summary-row')],open=rows.some(r=>!r.open);rows.forEach(r=>r.open=open);e.currentTarget.textContent=open?'Collapse all':'Expand all';});
   $('#sound-toggle').addEventListener('click',()=>{saved.sound=!saved.sound;persist();updateHeader();if(saved.sound)playSound('toggle');});
+  $('#sound-volume').addEventListener('input',e=>{saved.soundVolume=Number(e.target.value);if(saved.soundVolume>0)saved.sound=true;$('#volume-value').value=`${saved.soundVolume}%`;persist();updateHeader();});
+  $('#sound-volume').addEventListener('change',()=>playSound('toggle'));
   $('#theme-toggle').addEventListener('click',()=>{saved.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';persist();applyTheme(saved.theme);});
   $('#history-button').addEventListener('click',()=>{$('#history-content').innerHTML=saved.history.length?saved.history.map(x=>`<div class="history-item"><span><strong>${x.verb}</strong> ${x.jlpt?`<small>${x.jlpt}</small>`:''}<br>${x.date}</span><span>${x.firstTry}/${x.formCount||7} first try<br>${x.attempts} attempts</span></div>`).join(''):'<p class="history-empty">Complete your first quest to start a practice history.</p>';$('#history-dialog').showModal();});
   $('.dialog-close').addEventListener('click',()=>$('#history-dialog').close());
