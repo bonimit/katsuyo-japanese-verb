@@ -362,7 +362,7 @@
     }
     $('#custom-verb-error').textContent='';state.difficulty=d.get('difficulty');state.verbSource=source;state.practiceMode=d.get('practiceMode');saved.reading=d.get('reading');saved.practiceMode=state.practiceMode;persist();startRound(choose(state.difficulty,null,source));
   });
-  $('#forms-grid').addEventListener('click',e=>{if(e.target.closest('#finish-button'))nextForm();});$('#quit-button').addEventListener('click',()=>show('welcome'));
+  $('#forms-grid').addEventListener('click',e=>{if(e.target.closest('#finish-button'))nextForm();});$('#quit-button').addEventListener('click',()=>{location.href='index.html';});
   $('#reading-toggle').addEventListener('click',()=>{saved.reading=saved.reading==='kanji'?'hiragana':'kanji';persist();$('#verb-display').innerHTML=displayVerb();$('#reading-toggle').textContent=saved.reading==='kanji'?'漢 Kanji only':'ふ Furigana';});
   $('#retry-button').addEventListener('click',()=>startRound(state.verb,true));$('#new-verb-button').addEventListener('click',()=>startRound(choose(state.difficulty,state.verb.id,state.verbSource)));
   $('#expand-all').addEventListener('click',e=>{const rows=[...document.querySelectorAll('.summary-row')],open=rows.some(r=>!r.open);rows.forEach(r=>r.open=open);e.currentTarget.textContent=open?'Collapse all':'Expand all';});
