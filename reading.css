@@ -5,3 +5,4 @@
 .passage-japanese.with-readings{line-height:1.7}.reading-pair{display:block;margin:0 0 16px}.reading-pair>small{display:block;margin-bottom:2px;color:var(--plum);font:500 12px/1.5 "Noto Sans JP";letter-spacing:.02em}.reading-pair>span{display:block}
 
 .passage-reading-above{margin:0 0 2px;padding:0 0 8px;border:0;border-bottom:1px dashed var(--line);border-radius:0;background:transparent;color:var(--plum);font-size:12px;line-height:1.75}.passage-reading-above+.passage-japanese{margin-top:8px}
+.passage-japanese.with-furigana{line-height:3}.passage-japanese ruby{ruby-position:over}.passage-japanese rt{font:500 .52em/1.2 "Noto Sans JP";color:var(--plum);letter-spacing:0;white-space:nowrap}
