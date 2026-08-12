@@ -165,8 +165,8 @@
 
   function renderCurrentForm(){
     const i=state.current,f=ACTIVE_FORMS[i];
-    $('#challenge-title').textContent=f.name;
-    $('#form-description').innerHTML=`<strong>${f.simple}</strong><span>${f.prompt}</span>`;
+    $('#challenge-title').textContent=`${f.name} (${f.formal})`;
+    $('#form-description').innerHTML=`<strong>= ${f.simple}</strong><span>${f.prompt}</span>`;
     $('#forms-grid').innerHTML=`<form class="form-question" data-index="${i}" autocomplete="off">
       <div class="form-question-head"><label for="answer-${i}">Form ${i+1} of ${FORM_COUNT}</label><span>${f.short}</span></div>
       <div class="answer-row"><input id="answer-${i}" lang="ja" placeholder="Type in Japanese…" required autofocus><button class="submit-answer" type="submit">Check</button><button class="primary-button next-button hidden" id="finish-button" type="button">Next form <span>→</span></button></div>
