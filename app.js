@@ -4,7 +4,7 @@
   let ACTIVE_FORMS = [...FORMS];
   let FORM_COUNT = ACTIVE_FORMS.length;
   const key = 'kotobaQuest.v2';
-  const defaults = { reading:'kanji', sound:true, soundVolume:35, theme:null, streak:0, lastPlayed:null, history:[], misses:{}, formStats:{}, practiceMode:'all', customVerbIds:[] };
+  const defaults = { reading:'kanji', sound:true, soundVolume:35, theme:null, streak:0, lastPlayed:null, history:[], misses:{}, formStats:{}, practiceMode:'all', adaptiveLevel:null, adaptiveFeedback:{easy:0,hard:0}, customVerbIds:[] };
   let saved;
   try { saved = { ...defaults, ...JSON.parse(localStorage.getItem(key) || '{}') }; } catch { saved = {...defaults}; }
   const systemTheme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
@@ -70,9 +70,12 @@
   function chooseAdaptive(avoid){
     const recent=saved.history.filter(h=>h.jlpt&&h.formCount).slice(0,6);
     let targetIndex;
-    if(!recent.length){
-      targetIndex=Math.floor(Math.random()*JLPT_LEVELS.length);
-      state.adaptiveReason=`First adaptive round: trying ${JLPT_LEVELS[targetIndex]} to estimate your level.`;
+    if(Number.isInteger(saved.adaptiveLevel)){
+      targetIndex=saved.adaptiveLevel;
+      state.adaptiveReason=`AI remembered your level feedback and selected ${JLPT_LEVELS[targetIndex]}.`;
+    }else if(!recent.length){
+      targetIndex=0;
+      state.adaptiveReason=`First adaptive round: starting at ${JLPT_LEVELS[targetIndex]} to estimate your level.`;
     }else{
       const correct=recent.reduce((sum,h)=>sum+h.firstTry,0),forms=recent.reduce((sum,h)=>sum+h.formCount,0),attempts=recent.reduce((sum,h)=>sum+h.attempts,0);
       const accuracy=correct/forms,effort=attempts/forms,lastIndex=JLPT_LEVELS.indexOf(recent[0].jlpt);
@@ -84,6 +87,7 @@
       targetIndex=Math.max(0,Math.min(JLPT_LEVELS.length-1,targetIndex+explore));
       state.adaptiveReason=`AI selected ${JLPT_LEVELS[targetIndex]} from your recent ${Math.round(accuracy*100)}% first-try accuracy.`;
     }
+    saved.adaptiveLevel=targetIndex;persist();
     const pool=VERBS.filter(v=>v.jlpt===JLPT_LEVELS[targetIndex]&&v.id!==avoid);
     return pool[Math.floor(Math.random()*pool.length)]||VERBS[Math.floor(Math.random()*VERBS.length)];
   }
@@ -151,6 +155,8 @@
     $('#verb-display').innerHTML=displayVerb(); $('#verb-reading').textContent=verb.reading;
     $('#verb-romaji').textContent=verb.romaji;
     $('#verb-meaning').textContent=verb.meaning; $('#verb-group').textContent=`${verb.jlpt} · ${verb.group} verb`;
+    const adaptiveSession=(state.difficulty==='adaptive'&&state.verbSource==='difficulty')||state.practiceMode==='adaptive';
+    $('#adaptive-level-panel').classList.toggle('hidden',!adaptiveSession);$('#adaptive-level-value').textContent=verb.jlpt;$('#adaptive-level-note').textContent=saved.adaptiveFeedback.easy||saved.adaptiveFeedback.hard?'Your level includes your previous skip feedback.':'Use skip feedback if this level does not feel right.';
     const verbReason=state.difficulty==='adaptive'&&state.verbSource==='difficulty'?`${state.adaptiveReason} `:'';
     $('#companion-message').textContent=state.practiceMode==='adaptive'?`${verbReason}${state.formReason}`:verbReason||`One verb, ${FORM_COUNT} core forms. We’ll work through them in order.`;
     renderMap(); renderCurrentForm(); updateProgress(); updateConjugationGuide(); show('game');
@@ -309,6 +315,15 @@
     updateHeader();show('results');animateMascot('cheering');
   }
 
+  function adjustAdaptiveLevel(direction){
+    const current=Math.max(0,JLPT_LEVELS.indexOf(state.verb.jlpt)),next=Math.max(0,Math.min(JLPT_LEVELS.length-1,current+direction));
+    const kind=direction>0?'easy':'hard';saved.adaptiveFeedback[kind]=(saved.adaptiveFeedback[kind]||0)+1;saved.adaptiveLevel=next;persist();
+    if(next===current){$('#adaptive-level-note').textContent=direction>0?'You are already at the highest available level.':'You are already at the foundation level.';playSound('wrong');return;}
+    const pool=VERBS.filter(v=>v.jlpt===JLPT_LEVELS[next]&&v.id!==state.verb.id),verb=pool[Math.floor(Math.random()*pool.length)]||state.verb;
+    state.difficulty='adaptive';state.verbSource='difficulty';state.adaptiveReason=`You marked ${JLPT_LEVELS[current]} as ${direction>0?'too easy':'too difficult'}, so Katsu moved the test to ${JLPT_LEVELS[next]}.`;
+    playSound('next');startRound(verb,false);
+  }
+
   function updateHeader(){$('#streak-count').textContent=saved.streak;$('#sound-toggle').setAttribute('aria-pressed',String(saved.sound));$('#sound-toggle').setAttribute('aria-label',saved.sound?'Turn sound off':'Turn sound on');$('#sound-toggle').title=saved.sound?'Sound on':'Sound off';$('#sound-toggle span').textContent=saved.sound?'♪':'×';$('#sound-volume').value=saved.soundVolume;$('#volume-value').value=`${saved.soundVolume}%`;applyTheme(saved.theme||systemTheme);}
   function buildVerbSelector(){
     $('#custom-verb-list').innerHTML=VERBS.map(v=>{const type=verbType(v);return `<label data-jlpt="${v.jlpt}" data-group="${v.group.split(' ')[0]}" data-type="${type}" data-search="${`${v.kanji} ${v.reading} ${v.romaji} ${v.meaning}`.toLowerCase()}"><input type="checkbox" name="customVerb" value="${v.id}" ${saved.customVerbIds.includes(v.id)?'checked':''}><span><strong>${v.kanji}</strong> <span class="verb-kana">${v.reading}</span><br><span class="verb-romaji">${v.romaji}</span> · ${v.meaning}<br><small>${v.jlpt} · ${v.group} · ${type}</small></span></label>`}).join('');
@@ -354,6 +369,8 @@
   $('#sound-toggle').addEventListener('click',()=>{saved.sound=!saved.sound;persist();updateHeader();if(saved.sound)playSound('toggle');});
   $('#sound-volume').addEventListener('input',e=>{saved.soundVolume=Number(e.target.value);if(saved.soundVolume>0)saved.sound=true;$('#volume-value').value=`${saved.soundVolume}%`;persist();updateHeader();});
   $('#sound-volume').addEventListener('change',()=>playSound('toggle'));
+  $('#level-too-easy').addEventListener('click',()=>adjustAdaptiveLevel(1));
+  $('#level-too-hard').addEventListener('click',()=>adjustAdaptiveLevel(-1));
   $('#theme-toggle').addEventListener('click',()=>{saved.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';persist();applyTheme(saved.theme);});
   $('#history-button').addEventListener('click',()=>{$('#history-content').innerHTML=saved.history.length?saved.history.map(x=>`<div class="history-item"><span><strong>${x.verb}</strong> ${x.jlpt?`<small>${x.jlpt}</small>`:''}<br>${x.date}</span><span>${x.firstTry}/${x.formCount||7} first try<br>${x.attempts} attempts</span></div>`).join(''):'<p class="history-empty">Complete your first quest to start a practice history.</p>';$('#history-dialog').showModal();});
   $('.dialog-close').addEventListener('click',()=>$('#history-dialog').close());
