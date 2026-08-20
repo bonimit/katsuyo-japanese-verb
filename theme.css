@@ -83,13 +83,3 @@ html[data-theme="dark"] .setup-card,html[data-theme="dark"] .challenge-card,html
 html[data-theme="dark"] .challenge-card h1,html[data-theme="dark"] .verb-main h2,html[data-theme="dark"] .verb-meta strong,html[data-theme="dark"] .reading-intro h1{color:#fff9e9}
 html[data-theme="dark"] .form-map,html[data-theme="dark"] .reading-level-panel,html[data-theme="dark"] .reading-tip{background:#536457!important;border-color:#f4ecd5!important;color:#fff9e9!important;box-shadow:5px 7px 0 #27352e!important}
 @media(max-width:560px){.app-shell{background:linear-gradient(180deg,#bfe7dd 0 24%,#dcebb9 24% 38%,#f7f1dc 38%)}.welcome-screen::after,.reading-setup::after{display:none}}
-
-/* Restrained storybook palette */
-:root{--ink:#403c35;--muted:#686a63;--paper:#f3efe6;--card:#fbf8f0;--mint:#c8d1c3;--mint-dark:#52675d;--coral:#a56d68;--pink:#d2b8b2;--plum:#76534f;--gold:#d1c4a7;--line:#d1c8ba;--shadow:7px 9px 0 rgba(66,61,52,.14),0 18px 42px rgba(66,61,52,.08)}
-body{background:#e6e2d8}.app-shell{background:radial-gradient(ellipse at 12% 8%,rgba(255,255,255,.48) 0 6%,transparent 6.5%),linear-gradient(180deg,#e4ebe6 0 31%,#d8ded3 31% 48%,#f3efe6 48% 100%)}
-.site-header{background:rgba(248,245,236,.94)}.brand-mark{background:#b9827e;box-shadow:3px 3px 0 #c8bda7}.setup-card,.challenge-card,.verb-card,.summary-card,.score-card,.reading-setup-card,.passage-card,.reading-question-card{background:#fbf8f0!important}
-.setup-card::before{background:#d1c4a7}.segmented,.custom-verbs{background:#e8e3d9!important}.reading-options input:checked+.reading-card{background:#edf0e9!important;box-shadow:0 4px 0 #c8d1c3}
-.companion-intro::before{background:linear-gradient(150deg,#d8cfbd,#d8bbb5);box-shadow:8px 9px 0 #cbbfa9}.speech-bubble{box-shadow:5px 5px 0 #c9aaa4}.meet-label{box-shadow:0 0 0 4px #d1c4a7}
-.mori-panel{background:linear-gradient(135deg,#ddd7ca,#d1d8cc);box-shadow:7px 8px 0 #625e55}.mori-panel:hover{box-shadow:9px 11px 0 #625e55}
-.progress-track span,.reading-progress-track span{background:linear-gradient(90deg,#a56d68,#879887)}.hero-copy h1 em{color:#76534f}.eyebrow{color:#52675d}.eyebrow span{background:#a56d68}.welcome-screen::after,.reading-setup::after{color:#849182}
-@media(max-width:560px){.app-shell{background:linear-gradient(180deg,#e4ebe6 0 24%,#d8ded3 24% 38%,#f3efe6 38%)}}
