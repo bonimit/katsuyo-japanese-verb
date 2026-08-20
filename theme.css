@@ -53,3 +53,33 @@ html[data-theme="dark"] .progress-copy strong{color:var(--ink)}html[data-theme="
 .theme-toggle span{display:block;transition:transform .35s cubic-bezier(.2,.8,.2,1)}.theme-toggle:hover span{transform:rotate(22deg) scale(1.12)}
 @media(max-width:560px){.app-shell{background:linear-gradient(160deg,#fffaf2,#faecef 58%,#edf4e9)}}
 @media(prefers-reduced-motion:reduce){.theme-toggle span{transition:none}}
+
+/* Katsuyō storybook world — original UI inspired by playful picture books */
+:root{--ink:#3f392f;--muted:#686a5f;--paper:#f7f1dc;--card:#fffdf3;--mint:#cce7ad;--mint-dark:#36725b;--coral:#dc7d89;--pink:#f1b9c5;--plum:#a8465a;--gold:#f2d36f;--line:#d9ccb2;--shadow:7px 9px 0 rgba(70,62,48,.18),0 18px 42px rgba(70,62,48,.1)}
+body{background:#dfe9bd}
+.app-shell{background:radial-gradient(ellipse at 9% 8%,rgba(255,255,255,.82) 0 6%,transparent 6.5%),radial-gradient(ellipse at 18% 8%,rgba(255,255,255,.72) 0 4%,transparent 4.5%),radial-gradient(ellipse at 86% 16%,rgba(255,255,255,.7) 0 7%,transparent 7.5%),linear-gradient(180deg,#bfe7dd 0 31%,#dcebb9 31% 48%,#f7f1dc 48% 100%)}
+.app-shell::before{opacity:.16;background-image:radial-gradient(circle,#416f5a 0 1px,transparent 1.5px),radial-gradient(circle,#a84a5c 0 1px,transparent 1.5px);background-size:59px 59px,83px 83px}
+.site-header{background:rgba(255,251,232,.94);border-bottom:2px solid #3f392f;box-shadow:0 5px 0 rgba(63,57,47,.12)}
+.brand-mark{background:#ef9e83;border-color:#3f392f;box-shadow:3px 3px 0 #f2d36f}.icon-button,.streak-chip{border:1.5px solid #625b4f;background:#fffdf3;box-shadow:2px 3px 0 rgba(63,57,47,.14)}
+.setup-card,.challenge-card,.verb-card,.summary-card,.score-card,.reading-setup-card,.passage-card,.reading-question-card{border:2px solid #3f392f!important;border-radius:18px 28px 20px 25px!important;background:#fffdf3!important;box-shadow:7px 9px 0 rgba(70,62,48,.2),0 20px 45px rgba(70,62,48,.09)!important}
+.setup-card::before{border:2px solid #3f392f;background:#f2d36f;color:#3f392f;box-shadow:3px 3px 0 rgba(63,57,47,.14)}
+.primary-button,.submit-answer{border:2px solid #171412!important;border-radius:12px 15px 11px 14px!important;background:#211d19!important;box-shadow:0 6px 0 #000!important}.primary-button:hover,.submit-answer:hover{box-shadow:0 9px 0 #000!important}
+.secondary-button{border:2px solid #3f392f;background:#fffdf3;box-shadow:0 5px 0 #3f392f}
+.segmented,.custom-verbs{border:1.5px dashed #8c816e!important;background:#eee5ce!important}.segmented input:checked+span{background:#fffdf3;box-shadow:0 4px 0 #f1b9c5}
+.reading-card,select,.verb-search,.filter-checks label{border:1.5px solid #6b6356!important;background:#fffdf3!important}.reading-options input:checked+.reading-card{border:2px solid #36725b!important;background:#f0f8dc!important;box-shadow:0 4px 0 #a8d99e}
+.custom-verbs{background:#eee5ce!important}
+.companion-intro::before{border:3px solid #3f392f;background:linear-gradient(150deg,#f5d193,#edb6c4);box-shadow:8px 9px 0 #f2d36f}.companion-intro::after{background:#fff4b6}
+.large-mascot{border:0;box-shadow:none;filter:drop-shadow(0 12px 8px rgba(62,47,31,.18))}
+.speech-bubble{border:2px solid #3f392f;border-radius:18px 18px 5px 18px;background:#fffdf3;box-shadow:5px 5px 0 #eaa2b3}.meet-label{border:2px solid #3f392f;background:#fffdf3;box-shadow:0 0 0 4px #f2d36f}
+.mori-panel{border:2px solid #3f392f;border-radius:18px 26px 20px 24px;background:linear-gradient(135deg,#f2c4cb,#f7e5a8 55%,#cce7ad);box-shadow:7px 8px 0 #5f584b;color:#3f392f}.mori-panel:hover{box-shadow:9px 11px 0 #5f584b}.mori-panel .mascot{border:2px solid #3f392f;box-shadow:0 0 0 4px #fffdf3}
+.form-map,.reading-level-panel,.reading-tip{border:2px solid #3f392f!important;border-radius:17px 25px 19px 23px!important;background:rgba(255,253,243,.94)!important;box-shadow:5px 7px 0 rgba(70,62,48,.18)!important;color:#3f392f!important}.form-map-title,.form-map li.current{color:#3f392f}.form-map li{border-color:#d9ccb2;color:#686a5f}
+.progress-track,.reading-progress-track{border:1.5px solid #3f392f;background:#fffdf3;box-shadow:0 3px 0 rgba(63,57,47,.13)}.progress-track span,.reading-progress-track span{background:linear-gradient(90deg,#dc7d89,#f2d36f,#75b977)}
+.hero-copy h1,.reading-intro h1{color:#343127;text-shadow:0 4px 0 rgba(255,255,255,.55)}.hero-copy h1 em{color:#a8465a}.hero-copy p,.reading-intro p{color:#50584e}.eyebrow{color:#276b57}.eyebrow span{background:#dc7d89}
+.welcome-screen,.reading-setup{position:relative}.welcome-screen::after,.reading-setup::after{content:"✿  あ  ✿";position:absolute;right:4vw;top:27px;color:#8ab174;font:18px "Mochiy Pop One";letter-spacing:.5em;transform:rotate(3deg);opacity:.7}
+html[data-theme="dark"]{--ink:#fff9e9;--muted:#ded8c6;--paper:#3c4e43;--card:#536457;--mint:#b7d7a0;--mint-dark:#b7d7a0;--coral:#eda4ad;--pink:#e6b9c2;--plum:#f0b6c1;--gold:#ead17b;--line:#788475}
+html[data-theme="dark"] body{background:#34473e}html[data-theme="dark"] .app-shell{background:radial-gradient(ellipse at 12% 8%,rgba(255,255,255,.09) 0 7%,transparent 7.5%),linear-gradient(180deg,#375a55 0 34%,#4b5f43 34% 49%,#3d4b41 49%)}
+html[data-theme="dark"] .site-header{background:rgba(50,66,58,.94);border-bottom-color:#f4ecd5}html[data-theme="dark"] .icon-button,html[data-theme="dark"] .streak-chip{background:#536457;border-color:#f4ecd5}
+html[data-theme="dark"] .setup-card,html[data-theme="dark"] .challenge-card,html[data-theme="dark"] .verb-card,html[data-theme="dark"] .summary-card,html[data-theme="dark"] .score-card,html[data-theme="dark"] .reading-setup-card,html[data-theme="dark"] .passage-card,html[data-theme="dark"] .reading-question-card{background:#536457!important;border-color:#f4ecd5!important;color:#fff9e9!important;box-shadow:7px 9px 0 #27352e!important}
+html[data-theme="dark"] .challenge-card h1,html[data-theme="dark"] .verb-main h2,html[data-theme="dark"] .verb-meta strong,html[data-theme="dark"] .reading-intro h1{color:#fff9e9}
+html[data-theme="dark"] .form-map,html[data-theme="dark"] .reading-level-panel,html[data-theme="dark"] .reading-tip{background:#536457!important;border-color:#f4ecd5!important;color:#fff9e9!important;box-shadow:5px 7px 0 #27352e!important}
+@media(max-width:560px){.app-shell{background:linear-gradient(180deg,#bfe7dd 0 24%,#dcebb9 24% 38%,#f7f1dc 38%)}.welcome-screen::after,.reading-setup::after{display:none}}
